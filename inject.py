@@ -5,65 +5,65 @@ import json
 import urllib.request
 import time
 import argparse
+import tempfile
+import shutil
 
-SCRIPTS_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scripts.json")
 GAME_NAME = "AnimalCompany.exe"
 GAME_PATH = r"C:\Program Files (x86)\Steam\steamapps\common\Animal Company\AnimalCompany.exe"
+BASE_URL = "https://raw.githubusercontent.com/monkonglive-dev/MenuServers/main"
+
+SCRIPTS = {
+    "bridge":  {"url": "/frida-il2cpp-bridge.js", "always": True},
+    "symbols": {"url": "/symbols.ts",             "always": True},
+    "menu":    {"url": "/MonksMenu.ts",           "modes": ["menu", "all"]},
+    "eac":     {"url": "/eac.ts",                 "modes": ["eac", "all", "pcmode"]},
+    "stuff":   {"url": "/stuff.js",               "modes": ["eac", "all", "pcmode"]},
+    "pcmode":  {"url": "/pcmode.ts",              "modes": ["pcmode"]},
+    "quest":   {"url": "/m4quest.ts",             "modes": ["quest", "all"]},
+    "rpc":     {"url": "/discordrpc.ts",          "modes": ["all"]},
+}
 
 
-def load_config():
-    with open(SCRIPTS_JSON, "r") as f:
-        return json.load(f)
-
-
-def fetch_script(url):
-    if not url:
-        return None
+def fetch(url):
     try:
-        full_url = url if url.startswith("http") else url
-        req = urllib.request.Request(full_url, headers={"User-Agent": "MonksMenu/1.0"})
-        resp = urllib.request.urlopen(req, timeout=15)
-        source = resp.read().decode("utf-8")
-        return source
+        req = urllib.request.Request(url, headers={"User-Agent": "MonksMenu/1.0"})
+        return urllib.request.urlopen(req, timeout=15).read().decode("utf-8")
     except Exception as e:
-        print(f"  [!] Failed to fetch {url}: {e}")
+        print(f"  [!] Failed: {e}")
         return None
 
 
-def get_scripts_for_mode(mode, config):
-    base_url = config.get("base_url", "")
-    scripts = []
-    for name, info in config.get("scripts", {}).items():
+def get_mode_scripts(mode):
+    out = []
+    for name, info in SCRIPTS.items():
         always = info.get("always", False)
         modes = info.get("modes", [])
-        url = info.get("url", "")
-        if not url:
-            continue
         if always or mode in modes or mode == "all":
-            full_url = url if url.startswith("http") else f"{base_url.rstrip('/')}{url}"
-            scripts.append({"name": name, "url": full_url})
-    return scripts
+            out.append({"name": name, "url": f"{BASE_URL}{info['url']}"})
+    return out
 
 
 def inject(scripts, spawn=False):
-    if not scripts:
-        print("[!] No scripts to inject")
-        return
+    tmpdir = tempfile.mkdtemp(prefix="monkong_")
+    print(f"\n[*] Temp folder: {tmpdir}")
+    print(f"[*] Fetching {len(scripts)} script(s) from web...\n")
 
-    print(f"\n[*] Reading web stream... fetching {len(scripts)} script(s)")
-
-    loaded_sources = []
+    loaded = []
     for s in scripts:
         print(f"  Reading web response: {s['name']}...")
-        source = fetch_script(s["url"])
+        source = fetch(s["url"])
         if source:
-            loaded_sources.append((s["name"], source))
+            path = os.path.join(tmpdir, s["name"] + ".tmp")
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(source)
+            loaded.append((s["name"], path, source))
             print(f"  [+] Got {s['name']} ({len(source)} bytes)")
         else:
             print(f"  [!] Skipped {s['name']}")
 
-    if not loaded_sources:
+    if not loaded:
         print("[!] No scripts fetched")
+        shutil.rmtree(tmpdir, ignore_errors=True)
         return
 
     try:
@@ -78,7 +78,7 @@ def inject(scripts, spawn=False):
             session = frida.attach(GAME_NAME)
             print("[*] Attached")
 
-        for name, source in loaded_sources:
+        for name, path, source in loaded:
             try:
                 script = session.create_script(source, name=name)
                 script.load()
@@ -86,8 +86,10 @@ def inject(scripts, spawn=False):
             except Exception as e:
                 print(f"  [!] Failed {name}: {e}")
 
-        print(f"\n[*] {len(loaded_sources)} script(s) injected into memory")
-        print("[*] No files saved locally - all transmitted")
+        print(f"\n[*] {len(loaded)} script(s) injected into memory")
+        print("[*] Cleaning up temp files...")
+        shutil.rmtree(tmpdir, ignore_errors=True)
+        print("[*] Temp folder deleted - nothing on disk")
         print("[*] Press Ctrl+C to detach\n")
 
         try:
@@ -99,9 +101,11 @@ def inject(scripts, spawn=False):
             print("[*] Done")
 
     except frida.ProcessNotFoundError:
-        print(f"[!] {GAME_NAME} not found. Is the game running?")
+        print(f"[!] {GAME_NAME} not found")
+        shutil.rmtree(tmpdir, ignore_errors=True)
     except Exception as e:
         print(f"[!] Error: {e}")
+        shutil.rmtree(tmpdir, ignore_errors=True)
 
 
 def main():
@@ -111,14 +115,14 @@ def main():
     parser.add_argument("--spawn", action="store_true")
     args = parser.parse_args()
 
-    print("=" * 45)
-    print("  MONKSMENU INJECTOR")
+    print("=" * 50)
+    print("  MONKSMENU INJECTOR - Web Transmission Mode")
     print(f"  Mode: {args.mode.upper()}")
-    print("  Scripts are fetched from web, not saved locally")
-    print("=" * 45)
+    print("  Scripts are fetched from web, injected,")
+    print("  then deleted. Nothing saved locally.")
+    print("=" * 50)
 
-    config = load_config()
-    scripts = get_scripts_for_mode(args.mode, config)
+    scripts = get_mode_scripts(args.mode)
     inject(scripts, spawn=args.spawn)
 
 
