@@ -1,0 +1,45 @@
+{
+    "base_url": "https://raw.githubusercontent.com/monkonglive-dev/MenuServers/main",
+    "scripts": {
+        "bridge": {
+            "url": "/frida-il2cpp-bridge.js",
+            "local": "frida-il2cpp-bridge.js",
+            "always": true
+        },
+        "symbols": {
+            "url": "/symbols.ts",
+            "local": "symbols.ts",
+            "always": true
+        },
+        "menu": {
+            "url": "/MonksMenu.ts",
+            "local": "MonksMenu.ts",
+            "modes": ["menu", "all"]
+        },
+        "eac": {
+            "url": "/eac.ts",
+            "local": "eac.ts",
+            "modes": ["eac", "all", "pcmode"]
+        },
+        "stuff": {
+            "url": "/stuff.js",
+            "local": "stuff.js",
+            "modes": ["eac", "all", "pcmode"]
+        },
+        "pcmode": {
+            "url": "/pcmode.ts",
+            "local": "pcmode.ts",
+            "modes": ["pcmode"]
+        },
+        "m4quest": {
+            "url": "/m4quest.ts",
+            "local": "m4quest.ts",
+            "modes": ["quest", "all"]
+        },
+        "discordrpc": {
+            "url": "/discordrpc.ts",
+            "local": "discordrpc.ts",
+            "modes": ["all"]
+        }
+    }
+}
