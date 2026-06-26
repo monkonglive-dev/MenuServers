@@ -6,103 +6,88 @@ import urllib.request
 import time
 import argparse
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-BYPASSED_DIR = os.path.join(SCRIPT_DIR, "Bypassed")
-SCRIPTS_JSON = os.path.join(SCRIPT_DIR, "scripts.json")
+SCRIPTS_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scripts.json")
 GAME_NAME = "AnimalCompany.exe"
 GAME_PATH = r"C:\Program Files (x86)\Steam\steamapps\common\Animal Company\AnimalCompany.exe"
 
 
-def load_scripts_config():
-    if not os.path.exists(SCRIPTS_JSON):
-        print(f"[!] scripts.json not found at {SCRIPTS_JSON}")
-        return None
+def load_config():
     with open(SCRIPTS_JSON, "r") as f:
         return json.load(f)
 
 
-def download_script(url, dest):
+def fetch_script(url):
     if not url:
-        return False
+        return None
     try:
-        print(f"  Downloading {os.path.basename(dest)}...")
-        urllib.request.urlretrieve(url, dest)
-        return True
+        full_url = url if url.startswith("http") else url
+        req = urllib.request.Request(full_url, headers={"User-Agent": "MonksMenu/1.0"})
+        resp = urllib.request.urlopen(req, timeout=15)
+        source = resp.read().decode("utf-8")
+        return source
     except Exception as e:
-        print(f"  Failed to download {os.path.basename(dest)}: {e}")
-        return False
+        print(f"  [!] Failed to fetch {url}: {e}")
+        return None
 
 
-def resolve_scripts(mode, config):
-    scripts = []
-    cfg_scripts = config.get("scripts", {})
+def get_scripts_for_mode(mode, config):
     base_url = config.get("base_url", "")
-
-    subfolder_map = {"eac.ts": "Bypassed", "stuff.js": "Bypassed"}
-
-    for name, info in cfg_scripts.items():
+    scripts = []
+    for name, info in config.get("scripts", {}).items():
         always = info.get("always", False)
         modes = info.get("modes", [])
         url = info.get("url", "")
-        local = info.get("local", "")
-
-        if not local:
+        if not url:
             continue
-
-        subfolder = subfolder_map.get(local, "")
-        if subfolder:
-            local_path = os.path.join(SCRIPT_DIR, subfolder, local)
-        else:
-            local_path = os.path.join(SCRIPT_DIR, local)
-
         if always or mode in modes or mode == "all":
-            if url and not os.path.exists(local_path):
-                full_url = url if url.startswith("http") else f"{base_url.rstrip('/')}{url}"
-                download_script(full_url, local_path)
-
-            if os.path.exists(local_path):
-                scripts.append(local_path)
-            else:
-                print(f"  [!] Script not found: {local}")
-
+            full_url = url if url.startswith("http") else f"{base_url.rstrip('/')}{url}"
+            scripts.append({"name": name, "url": full_url})
     return scripts
 
 
-def inject_scripts(scripts, spawn=False):
+def inject(scripts, spawn=False):
     if not scripts:
         print("[!] No scripts to inject")
         return
 
-    script_names = [os.path.basename(s) for s in scripts]
-    print(f"\n[*] Injecting {len(scripts)} script(s): {', '.join(script_names)}")
+    print(f"\n[*] Reading web stream... fetching {len(scripts)} script(s)")
+
+    loaded_sources = []
+    for s in scripts:
+        print(f"  Reading web response: {s['name']}...")
+        source = fetch_script(s["url"])
+        if source:
+            loaded_sources.append((s["name"], source))
+            print(f"  [+] Got {s['name']} ({len(source)} bytes)")
+        else:
+            print(f"  [!] Skipped {s['name']}")
+
+    if not loaded_sources:
+        print("[!] No scripts fetched")
+        return
 
     try:
         if spawn:
-            print(f"[*] Spawning {GAME_NAME}...")
+            print(f"\n[*] Spawning {GAME_NAME}...")
             pid = frida.spawn([GAME_PATH])
-            device = frida.get_local_device()
-            session = device.attach(pid)
-            print(f"[*] Spawned with PID {pid}")
+            session = frida.get_local_device().attach(pid)
+            print(f"[*] Spawned PID {pid}")
             frida.resume(pid)
         else:
-            print(f"[*] Attaching to {GAME_NAME}...")
+            print(f"\n[*] Attaching to {GAME_NAME}...")
             session = frida.attach(GAME_NAME)
             print("[*] Attached")
 
-        loaded = []
-        for script_path in scripts:
+        for name, source in loaded_sources:
             try:
-                with open(script_path, "r", encoding="utf-8") as f:
-                    source = f.read()
-                name = os.path.basename(script_path)
-                frida_script = session.create_script(source, name=name)
-                frida_script.load()
-                loaded.append(name)
-                print(f"  [+] Loaded {name}")
+                script = session.create_script(source, name=name)
+                script.load()
+                print(f"  [+] Injected {name}")
             except Exception as e:
-                print(f"  [!] Failed to load {os.path.basename(script_path)}: {e}")
+                print(f"  [!] Failed {name}: {e}")
 
-        print(f"\n[*] {len(loaded)}/{len(scripts)} scripts loaded successfully")
+        print(f"\n[*] {len(loaded_sources)} script(s) injected into memory")
+        print("[*] No files saved locally - all transmitted")
         print("[*] Press Ctrl+C to detach\n")
 
         try:
@@ -115,48 +100,26 @@ def inject_scripts(scripts, spawn=False):
 
     except frida.ProcessNotFoundError:
         print(f"[!] {GAME_NAME} not found. Is the game running?")
-    except frida.ServerNotRunningError:
-        print("[!] Frida server not running. Start frida-server first.")
     except Exception as e:
-        print(f"[!] Injection error: {e}")
+        print(f"[!] Error: {e}")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="MonksMenu Frida Injector")
+    parser = argparse.ArgumentParser(description="MonksMenu Injector")
     parser.add_argument("mode", nargs="?", default="menu",
-                        choices=["menu", "eac", "pcmode", "quest", "all"],
-                        help="Injection mode (default: menu)")
-    parser.add_argument("--spawn", action="store_true",
-                        help="Spawn the game instead of attaching")
-    parser.add_argument("--download-only", action="store_true",
-                        help="Only download scripts, don't inject")
-    parser.add_argument("--list", action="store_true",
-                        help="List available scripts for current mode")
-
+                        choices=["menu", "eac", "pcmode", "quest", "all"])
+    parser.add_argument("--spawn", action="store_true")
     args = parser.parse_args()
 
     print("=" * 45)
     print("  MONKSMENU INJECTOR")
     print(f"  Mode: {args.mode.upper()}")
+    print("  Scripts are fetched from web, not saved locally")
     print("=" * 45)
 
-    config = load_scripts_config()
-    if not config:
-        sys.exit(1)
-
-    scripts = resolve_scripts(args.mode, config)
-
-    if args.list:
-        print(f"\nScripts for mode '{args.mode}':")
-        for s in scripts:
-            print(f"  - {os.path.basename(s)}")
-        return
-
-    if args.download_only:
-        print("\nDownload complete.")
-        return
-
-    inject_scripts(scripts, spawn=args.spawn)
+    config = load_config()
+    scripts = get_scripts_for_mode(args.mode, config)
+    inject(scripts, spawn=args.spawn)
 
 
 if __name__ == "__main__":
