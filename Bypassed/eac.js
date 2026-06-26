@@ -1,19 +1,19 @@
-declare const Il2Cpp: any;
-declare const console: any;
+
+
 
 Il2Cpp.perform(() => {
 
-    let baseAddr: any = null;
-    const moduleNames = ["GameAssembly.dll", "GameAssembly.dll"];
-    for (const name of moduleNames) {
-        const mod = Process.findModuleByName(name);
+    var baseAddr = null;
+    var moduleNames = ["GameAssembly.dll", "GameAssembly.dll"];
+    for (var name of moduleNames) {
+        var mod = Process.findModuleByName(name);
         if (mod) {
             baseAddr = mod.base;
             break;
         }
     }
 
-    let eacManagerInstance: any = null;
+    var eacManagerInstance = null;
 
     function forceValid() {
         if (eacManagerInstance && !eacManagerInstance.isNull()) {
@@ -22,9 +22,9 @@ Il2Cpp.perform(() => {
     }
 
     try {
-        const addr = baseAddr.add(0x69FA30);
+        var addr = baseAddr.add(0x69FA30);
         Interceptor.attach(addr, {
-            onEnter: function(args: any[]) {
+            onEnter: function(args[]) {
                 eacManagerInstance = args[0];
                 forceValid();
             }
@@ -32,16 +32,16 @@ Il2Cpp.perform(() => {
     } catch (e) {
     }
     try {
-        const addr = baseAddr.add(0x6B0B10);
+        var addr = baseAddr.add(0x6B0B10);
         Interceptor.attach(addr, {
-            onEnter: function(args: any[]) {
-                const d10Instance = args[0];
-                const manager = d10Instance.add(0x20).readPointer();
+            onEnter: function(args[]) {
+                var d10Instance = args[0];
+                var manager = d10Instance.add(0x20).readPointer();
                 if (!manager.isNull()) {
                     eacManagerInstance = manager;
                 }
             },
-            onLeave: function(retval: any) {
+            onLeave: function(retval) {
                 forceValid();
             }
         });
@@ -50,15 +50,15 @@ Il2Cpp.perform(() => {
     }
 
     try {
-        const addr = baseAddr.add(0x69FAF0);
-        Interceptor.replace(addr, new NativeCallback(function(self: any, data: any, methodInfo: any) {
+        var addr = baseAddr.add(0x69FAF0);
+        Interceptor.replace(addr, new NativeCallback(function(self, data, methodInfo) {
         }, 'void', ['pointer', 'pointer', 'pointer']));
     } catch (e) {
     }
 
     try {
-        const addr = baseAddr.add(0x699260);
-        Interceptor.replace(addr, new NativeCallback(function(self: any, methodInfo: any) {
+        var addr = baseAddr.add(0x699260);
+        Interceptor.replace(addr, new NativeCallback(function(self, methodInfo) {
             forceValid();
         }, 'void', ['pointer', 'pointer']));
     } catch (e) {
