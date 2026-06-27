@@ -105,48 +105,51 @@ set "SCRIPTS="
 
 echo  %ESC%[96mDownloading scripts...%ESC%[0m
 
-REM Always: eac first, bridge, symbols
-call :download "%BASE%/Bypassed/eac.js" "%SCRIPTDIR%\01_eac.js"
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\01_eac.js""
+REM Bridge FIRST - defines Il2Cpp used by all other scripts
+call :download "%BASE%/frida-il2cpp-bridge.js" "%SCRIPTDIR%\01_bridge.js"
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\01_bridge.js""
 
-if "%1"=="eac" goto :extra_eac
+REM Symbols second - defines offsets used by other scripts
+call :download "%BASE%/symbols.js" "%SCRIPTDIR%\02_symbols.js"
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\02_symbols.js""
+
+REM EAC bypass third
+call :download "%BASE%/Bypassed/eac.js" "%SCRIPTDIR%\03_eac.js"
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\03_eac.js""
+
+if "%1"=="eac" goto :done
 if "%1"=="pcmode" goto :extra_pcmode
 if "%1"=="quest" goto :extra_quest
 
 REM all mode
-call :download "%BASE%/Bypassed/stuff.js" "%SCRIPTDIR%\02_stuff.js"
-call :download "%BASE%/MonksMenu.js" "%SCRIPTDIR%\03_menu.js"
-call :download "%BASE%/m4quest.js" "%SCRIPTDIR%\04_quest.js"
-call :download "%BASE%/pcmode.js" "%SCRIPTDIR%\05_pcmode.js"
-call :download "%BASE%/discordrpc.js" "%SCRIPTDIR%\06_rpc.js"
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\02_stuff.js""
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\03_menu.js""
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\04_quest.js""
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\05_pcmode.js""
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\06_rpc.js""
-goto :add_bridge
+call :download "%BASE%/Bypassed/stuff.js" "%SCRIPTDIR%\04_stuff.js"
+call :download "%BASE%/MonksMenu.js" "%SCRIPTDIR%\05_menu.js"
+call :download "%BASE%/m4quest.js" "%SCRIPTDIR%\06_quest.js"
+call :download "%BASE%/discordrpc.js" "%SCRIPTDIR%\07_rpc.js"
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\04_stuff.js""
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\05_menu.js""
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\06_quest.js""
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\07_rpc.js""
+goto :done
 
 :extra_eac
-call :download "%BASE%/Bypassed/stuff.js" "%SCRIPTDIR%\02_stuff.js"
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\02_stuff.js""
-goto :add_bridge
+call :download "%BASE%/Bypassed/stuff.js" "%SCRIPTDIR%\04_stuff.js"
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\04_stuff.js""
+goto :done
 
 :extra_pcmode
-call :download "%BASE%/Bypassed/stuff.js" "%SCRIPTDIR%\02_stuff.js"
-call :download "%BASE%/pcmode.js" "%SCRIPTDIR%\03_pcmode.js"
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\02_stuff.js""
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\03_pcmode.js""
-goto :add_bridge
+call :download "%BASE%/Bypassed/stuff.js" "%SCRIPTDIR%\04_stuff.js"
+call :download "%BASE%/pcmode.js" "%SCRIPTDIR%\05_pcmode.js"
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\04_stuff.js""
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\05_pcmode.js""
+goto :done
 
 :extra_quest
-call :download "%BASE%/m4quest.js" "%SCRIPTDIR%\02_quest.js"
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\02_quest.js""
-goto :add_bridge
+call :download "%BASE%/m4quest.js" "%SCRIPTDIR%\04_quest.js"
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\04_quest.js""
+goto :done
 
-:add_bridge
-call :download "%BASE%/frida-il2cpp-bridge.js" "%SCRIPTDIR%\98_bridge.js"
-call :download "%BASE%/symbols.js" "%SCRIPTDIR%\99_symbols.js"
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\98_bridge.js" -l "%SCRIPTDIR%\99_symbols.js""
+:done
 
 echo.
 echo  %ESC%[93mPress any key to attach to game...%ESC%[0m

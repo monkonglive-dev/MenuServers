@@ -15,6 +15,19 @@
     }
     // Hook openxr_loader!xrCreateInstance → return XR_SUCCESS + fake instance
     if (openxrLoader) {
+    var openxrLoader = Process.findModuleByName("openxr_loader.dll")
+        || Process.findModuleByName("XRLoader.dll")
+        || Process.findModuleByName("UnityOpenXR.dll")
+        || Process.findModuleByName("OculusXRPlugin.dll")
+        || Process.findModuleByName("UnityXRPlugin.dll")
+        || Process.findModuleByName("oculus.dll");
+    if (!openxrLoader) {
+        console.log("[PCMode] No XR native module found, trying GameAssembly hooks");
+    } else {
+        console.log("[PCMode] Found XR module: " + openxrLoader.name);
+    }
+    // Hook openxr_loader!xrCreateInstance → return XR_SUCCESS + fake instance
+    if (openxrLoader) {
         var xrCreateInstance = openxrLoader.findExportByName("xrCreateInstance");
         if (xrCreateInstance) {
             Interceptor.attach(xrCreateInstance, {
