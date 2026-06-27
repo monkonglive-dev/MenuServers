@@ -128,7 +128,7 @@ set "MODE=menu"
 if exist "%SCRIPTDIR%" rmdir /s /q "%SCRIPTDIR%"
 mkdir "%SCRIPTDIR%" >nul 2>&1
 echo  %ESC%[96mDownloading scripts...%ESC%[0m
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$base='%BASE%'; $d='%SCRIPTDIR%'; $v='%CB%'; $files=@(@('01_bridge.js','frida-il2cpp-bridge.js'),('02_symbols.js','symbols.js'),('03_eac.js','Bypassed/eac.js'),('04_stuff.js','Bypassed/stuff.js'),('05_menu.js','MonksMenu.js')); foreach($f in $files){try{$r=Invoke-WebRequest -Uri \"$base/$($f[1])?v=$v\" -UseBasicParsing -TimeoutSec 15;[IO.File]::WriteAllText(\"$d\$($f[0])\",$r.Content);Write-Host \"  [+] Downloaded: $($f[0])\"}catch{Write-Host \"  [!] Failed: $($f[0])\"}}"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$base='%BASE%'; $d='%SCRIPTDIR%'; $v='%CB%'; $files=@(@('01_bridge.js','frida-il2cpp-bridge.js'),('02_symbols.js','symbols.js'),('03_menu.js','MonksMenu.js')); foreach($f in $files){try{$r=Invoke-WebRequest -Uri \"$base/$($f[1])?v=$v\" -UseBasicParsing -TimeoutSec 15;[IO.File]::WriteAllText(\"$d\$($f[0])\",$r.Content);Write-Host \"  [+] Downloaded: $($f[0])\"}catch{Write-Host \"  [!] Failed: $($f[0])\"}}"
 goto do_inject
 
 :do_inject
