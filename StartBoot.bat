@@ -153,7 +153,7 @@ echo  %ESC%[93mPress any key to attach to game...%ESC%[0m
 pause >nul
 
 echo  %ESC%[96mInjecting scripts...%ESC%[0m
-frida -n "animalcompany.exe" %SCRIPTS% --no-pause
+frida -n "animalcompany.exe" --runtime=v8 %SCRIPTS%
 
 echo.
 echo  %ESC%[93mCleaning up...%ESC%[0m
