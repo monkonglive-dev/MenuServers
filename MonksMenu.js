@@ -705,7 +705,7 @@ var roundCornersEnabled = false;
 var menuOutlineEnabled = false;
 var GunPointer = null;
 var GunLine = null;
-var vfxTypeEntries = Object.entries(VFXTypes).filter(([_, value]) => typeof value === "number") as [string, number][];
+var vfxTypeEntries = Object.entries(VFXTypes).filter(([_, value]) => typeof value === "number");
 var selectedVfxIndex = Math.max(0, vfxTypeEntries.findIndex(([name]) => name === "ConfettiBurst"));
 var vfxDispatchUnavailableUntil = 0;
 var vfxNoRunnerLogTime = 0;
