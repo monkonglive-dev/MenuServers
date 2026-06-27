@@ -31,9 +31,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
  "Write-Host ('  {0}[90m#{0}[0m  {0}[91mM{0}[93mO{0}[92mN{0}[96mK{0}[94mO{0}[95mN{0}[91mG{0}[93mS{0}[0m  {0}[92mS{0}[96mI{0}[94mD{0}[95mE{0}[91mL{0}[93mO{0}[92mA{0}[96mD{0}[94mE{0}[95mR{0}[0m  {0}[90m#{0}[0m' -f $r); " ^
  "Write-Host ('  {0}[90m+=========================================+{0}[0m' -f $r); " ^
  "Write-Host ('  {0}[90m#{0}[0m                                         {0}[90m#{0}[0m' -f $r); " ^
- "$opts = @('1. EAC Defuser','2. M4Quest (with EAC)','3. Start Everything'); " ^
- "$colors = @('96','92','93'); " ^
- "for ($i=0; $i -lt 3; $i++) { " ^
+ "$opts = @('1. EAC Defuser','2. M4Quest (with EAC)','3. Start Everything','4. Menu Only'); " ^
+ "$colors = @('96','92','93','95'); " ^
+ "for ($i=0; $i -lt 4; $i++) { " ^
  "  $c = $colors[$i]; " ^
  "  if (($i+1) -eq $s) { " ^
  "    Write-Host ('  {0}[90m#{0}[0m  {0}[97m^>{0}[0m {0}[{1}m{2}{0}[90m#{0}[0m' -f $r,$c,$opts[$i].PadRight(38)) " ^
@@ -52,12 +52,12 @@ exit /b 0
 for /f "delims=" %%A in ('powershell -NoProfile -Command "$k = $host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown'); Write-Output $k.VirtualKeyCode"') do set "key=%%A"
 if "!key!"=="38" (
     set /a selected-=1
-    if !selected! lss 1 set "selected=3"
+    if !selected! lss 1 set "selected=4"
     goto menu
 )
 if "!key!"=="40" (
     set /a selected+=1
-    if !selected! gtr 3 set "selected=1"
+    if !selected! gtr 4 set "selected=1"
     goto menu
 )
 if "!key!"=="13" goto selected_!selected!
@@ -80,6 +80,12 @@ cls
 echo.
 echo  %ESC%[93mFetching scripts from server...%ESC%[0m
 goto do_download_all
+
+:selected_4
+cls
+echo.
+echo  %ESC%[93mFetching scripts from server...%ESC%[0m
+goto do_download_menu
 
 :do_download_eac
 set "SCRIPTDIR=%TEMP%\monkong_scripts"
@@ -114,6 +120,17 @@ echo  %ESC%[96mDownloading scripts...%ESC%[0m
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$base='%BASE%'; $d='%SCRIPTDIR%'; $v='%CB%'; $files=@(@('01_bridge.js','frida-il2cpp-bridge.js'),('02_symbols.js','symbols.js'),('03_eac.js','Bypassed/eac.js'),('04_stuff.js','Bypassed/stuff.js'),('05_menu.js','MonksMenu.js'),('06_quest.js','m4quest.js'),('07_rpc.js','discordrpc.js')); foreach($f in $files){try{$r=Invoke-WebRequest -Uri \"$base/$($f[1])?v=$v\" -UseBasicParsing -TimeoutSec 15;[IO.File]::WriteAllText(\"$d\$($f[0])\",$r.Content);Write-Host \"  [+] Downloaded: $($f[0])\"}catch{Write-Host \"  [!] Failed: $($f[0])\"}}"
 goto do_inject
 
+:do_download_menu
+set "SCRIPTDIR=%TEMP%\monkong_scripts"
+set "BASE=https://raw.githubusercontent.com/monkonglive-dev/MenuServers/main"
+set "CB=%RANDOM%"
+set "MODE=menu"
+if exist "%SCRIPTDIR%" rmdir /s /q "%SCRIPTDIR%"
+mkdir "%SCRIPTDIR%" >nul 2>&1
+echo  %ESC%[96mDownloading scripts...%ESC%[0m
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$base='%BASE%'; $d='%SCRIPTDIR%'; $v='%CB%'; $files=@(@('01_bridge.js','frida-il2cpp-bridge.js'),('02_symbols.js','symbols.js'),('03_eac.js','Bypassed/eac.js'),('04_stuff.js','Bypassed/stuff.js'),('05_menu.js','MonksMenu.js')); foreach($f in $files){try{$r=Invoke-WebRequest -Uri \"$base/$($f[1])?v=$v\" -UseBasicParsing -TimeoutSec 15;[IO.File]::WriteAllText(\"$d\$($f[0])\",$r.Content);Write-Host \"  [+] Downloaded: $($f[0])\"}catch{Write-Host \"  [!] Failed: $($f[0])\"}}"
+goto do_inject
+
 :do_inject
 echo.
 echo  %ESC%[93mLoad into the game, then press M to inject...%ESC%[0m
@@ -136,6 +153,8 @@ if "!MODE!"=="eac" (
     echo  %ESC%[92mSuccessfully sideloaded EAC Defuser!%ESC%[0m
 ) else if "!MODE!"=="quest" (
     echo  %ESC%[92mSuccessfully sideloaded M4Quest!%ESC%[0m
+) else if "!MODE!"=="menu" (
+    echo  %ESC%[92mSuccessfully sideloaded Menu!%ESC%[0m
 ) else (
     echo  %ESC%[92mSuccessfully sideloaded everything!%ESC%[0m
 )
