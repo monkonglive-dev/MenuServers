@@ -870,18 +870,18 @@ Il2Cpp.perform(() => {
         } catch(_) {}
     }
     var images = {
-        "AnimalCompany".domain.assembly("AnimalCompany").image,
-        "UnityEngine.CoreModule".domain.assembly("UnityEngine.CoreModule").image,
-        "UnityEngine.PhysicsModule".domain.assembly("UnityEngine.PhysicsModule").image,
-        "UnityEngine.UIModule".domain.assembly("UnityEngine.UIModule").image,
-        "UnityEngine.UI".domain.assembly("UnityEngine.UI").image,
-        "UnityEngine.TextRenderingModule".domain.assembly("UnityEngine.TextRenderingModule").image,
-        "PhotonFusionNetworking".domain.assembly("Fusion.Runtime").image,
-        "PhotonFusionNetworkingRealtime".domain.assembly("Fusion.Realtime").image,
-        "Unity.TextMeshPro".domain.assembly("Unity.TextMeshPro").image,
-        "UnityEngine.XRModule".domain.assembly("UnityEngine.XRModule").image,
-        "UnityEngine.AudioModule".domain.assembly("UnityEngine.AudioModule").image,
-        "Oculus.Platform".domain.assembly("Oculus.Platform").image,
+        "AnimalCompany": Il2Cpp.domain.assembly("AnimalCompany").image,
+        "UnityEngine.CoreModule": Il2Cpp.domain.assembly("UnityEngine.CoreModule").image,
+        "UnityEngine.PhysicsModule": Il2Cpp.domain.assembly("UnityEngine.PhysicsModule").image,
+        "UnityEngine.UIModule": Il2Cpp.domain.assembly("UnityEngine.UIModule").image,
+        "UnityEngine.UI": Il2Cpp.domain.assembly("UnityEngine.UI").image,
+        "UnityEngine.TextRenderingModule": Il2Cpp.domain.assembly("UnityEngine.TextRenderingModule").image,
+        "PhotonFusionNetworking": Il2Cpp.domain.assembly("Fusion.Runtime").image,
+        "PhotonFusionNetworkingRealtime": Il2Cpp.domain.assembly("Fusion.Realtime").image,
+        "Unity.TextMeshPro": Il2Cpp.domain.assembly("Unity.TextMeshPro").image,
+        "UnityEngine.XRModule": Il2Cpp.domain.assembly("UnityEngine.XRModule").image,
+        "UnityEngine.AudioModule": Il2Cpp.domain.assembly("UnityEngine.AudioModule").image,
+        "Oculus.Platform": Il2Cpp.domain.assembly("Oculus.Platform").image,
     };
     var AssemblyCSharp           = images["AnimalCompany"];
     var UnityEngineCore          = images["UnityEngine.CoreModule"];
