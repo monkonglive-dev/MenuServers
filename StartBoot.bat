@@ -140,6 +140,14 @@ for %%f in ("%SCRIPTDIR%\*.js") do (
 frida -n "animalcompany.exe" --runtime=v8 !FRIDA_ARGS!
 
 echo.
+if "%MODE%"=="eac" (
+    echo  %ESC%[92mSuccessfully sideloaded EAC Defuser!%ESC%[0m
+) else if "%MODE%"=="quest" (
+    echo  %ESC%[92mSuccessfully sideloaded M4Quest!%ESC%[0m
+) else (
+    echo  %ESC%[92mSuccessfully sideloaded everything!%ESC%[0m
+)
+echo.
 echo  %ESC%[93mCleaning up...%ESC%[0m
 rmdir /s /q "%SCRIPTDIR%" >nul 2>&1
 exit /b
