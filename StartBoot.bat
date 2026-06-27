@@ -17,8 +17,6 @@ echo %ESC%[91m----------------------------------%ESC%[0m
 setlocal enabledelayedexpansion
 set "selected=1"
 
-goto :selected_1
-
 :menu
 cls
 call :showmenu
