@@ -12,8 +12,8 @@ function normalizePlayerToken(value) {
 function normalizeWhitelistToken(value) {
     return normalizePlayerToken(value).toLowerCase();
 }
-function getPlayerIdentityInfo(p): { key, label, aliases[] } {
-    var aliases[] = [];
+function getPlayerIdentityInfo(p) {
+    var aliases = [];
     var pushAlias = (value) => {
         var token = normalizePlayerToken(value);
         if (!token || token === "?" || aliases.includes(token)) return;
@@ -87,7 +87,7 @@ function uxVec3Str(v) {
     } catch(_) { return "(?,?,?)"; }
 }
 function uxGetComponentNames(go)[] {
-    var names[] = [];
+    var names = [];
     try {
         var comps = go.method("GetComponentsInChildren", 1)
             .inflate(Il2Cpp.domain.assembly("UnityEngine.CoreModule").image.class("UnityEngine.Component"))
@@ -651,36 +651,36 @@ var testMoneySpawnDelay = 0;
 var researchOreSpawnDelay = 0;
 var researchOreFailNotifyDelay = 0;
 var handStealDelay = 0;
-var textSpawnedObjects[] = [];
-var textBlueprintCache[] | null = null;
+var textSpawnedObjects = [];
+var textBlueprintCache = null;
 var randomAllItemsCursor = 0;
 var wlTargetActionDelay = 0;
-var whitelist[] = [];
-var netplrs[] = [];
+var whitelist = [];
+var netplrs = [];
 var whitelistDisintegrateDelays = {};
 var whitelistGunRe = false;
-var sellingmachineSpawns[] = [];
-var presentSpawns[] = [];
-var spawnedNetworkPrefabs[] = [];
-var spawnedPersistentMobs[] = [];
+var sellingmachineSpawns = [];
+var presentSpawns = [];
+var spawnedNetworkPrefabs = [];
+var spawnedPersistentMobs = [];
 var movementPlatformLeft = null;
 var movementPlatformRight = null;
 var platformSpawnDelay = 0;
 var menuSnapNextFrame = false;
-var orbiters[] = [];
-var orbitprefabs[] = [];
-var buggyOrbiters[] = [];
-var buggyOrbitPrefabs[] = [];
-var sharkOrbiters[] = [];
-var sharkOrbitPrefabs[] = [];
-var sellingTowerOrbiters[] = [];
-var sellingTowerOrbitPrefabs[] = [];
-var itemTornadoEntries[] = [];
-var spazMachineEntries[] = [];
+var orbiters = [];
+var orbitprefabs = [];
+var buggyOrbiters = [];
+var buggyOrbitPrefabs = [];
+var sharkOrbiters = [];
+var sharkOrbitPrefabs = [];
+var sellingTowerOrbiters = [];
+var sellingTowerOrbitPrefabs = [];
+var itemTornadoEntries = [];
+var spazMachineEntries = [];
 var transformForwardAxisCache = new Map();
-var persistentMobEntries[] = [];
-var wlSellingOrbitEntries[] = [];
-var wlSellingOrbitPrefabs[] = [];
+var persistentMobEntries = [];
+var wlSellingOrbitEntries = [];
+var wlSellingOrbitPrefabs = [];
 var wlOrbitAllTarget = null;
 var wlOrbitAllPhase = 0;
 var wlPissTarget = null;
@@ -689,8 +689,8 @@ var wlRightHandDuperTarget = null;
 var wlItemDuperHandTarget = null;
 var wlStashEjectDuperTarget = null;
 var wlItemDuperHandDelay = 0;
-var mobOrbitEntries[] = [];
-var prefabOrbitEntries[] = [];
+var mobOrbitEntries = [];
+var prefabOrbitEntries = [];
 var heldSellingMachine = null;
 var forceDevModeEnabled = false;
 var mobForceStayEnabled = false;
@@ -698,9 +698,9 @@ var mobSpawnAsyncBroken = false;
 var forceAllStashSlotsEnabled = false;
 var containerFreedomAuraEnabled = false;
 var containerFreedomSweepDelay = 0;
-var playerCagePrefabs[] = [];
-var playerCageEntries[] = [];
-var spawnedGoopObjects[] = [];
+var playerCagePrefabs = [];
+var playerCageEntries = [];
+var spawnedGoopObjects = [];
 var roundCornersEnabled = false;
 var menuOutlineEnabled = false;
 var GunPointer = null;
@@ -709,7 +709,7 @@ var vfxTypeEntries = Object.entries(VFXTypes).filter(([_, value]) => typeof valu
 var selectedVfxIndex = Math.max(0, vfxTypeEntries.findIndex(([name]) => name === "ConfettiBurst"));
 var vfxDispatchUnavailableUntil = 0;
 var vfxNoRunnerLogTime = 0;
-var vfxMethodNamesCache[] | null = null;
+var vfxMethodNamesCache = null;
 var nameTagsEnabled = false;
 var arenaEspEnabled = false;
 var adminLeaderboardEspEnabled = true;
@@ -719,7 +719,7 @@ var adminLeaderboardOrbitEnabled = false;
 var adminLeaderboardOrbitTarget = null;
 var adminLeaderboardOrbitPhase = 0;
 var adminLeaderboardMultiOrbitEnabled = false;
-var adminLeaderboardMultiOrbitList[] = [];
+var adminLeaderboardMultiOrbitList = [];
 var adminLeaderboardMultiOrbitPhase = 0;
 var adminLeaderboardOrbitGunDelay = 0;
 var arenaAimbotEnabled = false;
@@ -735,8 +735,8 @@ var multiBuyHookGuard = false;
 var playerNameTagEntries = new Map();
 var playerEspEntries = new Map();
 var prefabIndex = 0;
-var adminSpawnerMobPrefabs[] = [];
-var prefabIDs[] = [
+var adminSpawnerMobPrefabs = [];
+var prefabIDs = [
     "Shipwheel",
     "TeleportMachine",
     "FourLeafQuest_FourLeafSpawner",
@@ -1170,7 +1170,7 @@ Il2Cpp.perform(() => {
             return null;
         }
     }
-    var fallbackTextBlueprintPieces[] = [
+    var fallbackTextBlueprintPieces = [
         { pos: [-4.592, 7.076, -1.16] },
         { pos: [-4.061, 7.081, -1.159] },
         { pos: [-4.207, 7.176, -1.167] },
@@ -1277,7 +1277,7 @@ Il2Cpp.perform(() => {
     var TEXT_SPAWN_SCALE = 0.16;
     function readTextBlueprintPieces()[] {
         if (textBlueprintCache && textBlueprintCache.length > 0) return textBlueprintCache;
-        var parsedPieces[] = [];
+        var parsedPieces = [];
         try {
             var content = "";
             var file = new File(TEXT_SPAWN_BLUEPRINT_PATH, "r");
@@ -1374,7 +1374,7 @@ Il2Cpp.perform(() => {
             sendNotification("Test: gave -10M to " + count + " players", false, 4);
         } catch(e) { sendNotification("Test money all: " + e, false); }
     }
-    var mineableResearchOrePrefabNames[] = [
+    var mineableResearchOrePrefabNames = [
         "R_CoreVein",
         "R_CoreVein_1",
         "Core Ore",
@@ -1585,7 +1585,7 @@ Il2Cpp.perform(() => {
     }
     function clearSpawnedTextHellOre() {
         var cleared = 0;
-        var remaining[] = [];
+        var remaining = [];
         for (var obj of textSpawnedObjects) {
             try {
                 if (!obj || obj.isNull?.()) continue;
@@ -1689,7 +1689,7 @@ function acResolveMobID(mobId) {
 function acEnableMobValidatorBypass() {
     if (acMobValidatorBypassEnabled) return;
     try {
-        acAnimalCompanyImage().class("AnimalCompany.MobSpawnValidator").method("IsMobAllowed", 1).implementation = () => true;
+        acAnimalCompanyImage().class("AnimalCompany.MobSpawnValidator").method("IsMobAllowed", 1).implementation = () => {
         acMobValidatorBypassEnabled = true;
     } catch(e) { console.error("[MobValidatorBypass]", e); }
 }
@@ -1867,7 +1867,7 @@ function spawnMobAtPos(mobEntry: { name; id }, pos, rot) {
         return null;
     }
     function getNetworkPrefabDescriptions()[] {
-        var names[] = [];
+        var names = [];
         try {
             var runner = PrefabGen.field("_instance").value.method("get_runner").invoke();
             if (!runner || runner.isNull()) return names;
@@ -1896,7 +1896,7 @@ function spawnMobAtPos(mobEntry: { name; id }, pos, rot) {
         }
     }
     function scanExistingMobPrefabs()[] {
-        var found[] = [];
+        var found = [];
         var seen = new Set();
         var knownMobNames = new Set();
         for (var mob of mobIDs) {
@@ -2152,7 +2152,7 @@ function spawnMobAtPos(mobEntry: { name; id }, pos, rot) {
     var cachedSpawnPrefab = null;
     var cachedSpawnPrefabName = "";
     var prefabTestIndex = 0;
-    var lockedItems[] = [];
+    var lockedItems = [];
     var lastSpawnSearchTime = 0;
     function world2Player(position) {
         position = Vector3.method("op_Subtraction", 2).invoke(position, getTransform(bodyCollider).method("get_position").invoke());
@@ -2321,7 +2321,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
     function collectAllLobbyItemsWithHeld()[] {
         var results = getAllLobbyItemGameObjects();
         var seen = new Set();
-        var finalItems[] = [];
+        var finalItems = [];
         for (var item of results) {
             try {
                 var key = normalizeSceneObjectHandle(item) || String(item);
@@ -2649,7 +2649,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
                 ];
                 var goop = spawnItemAtPos("item_goop", spawnPos, identityQuaternion);
                 if (!goop || goop.isNull?.()) continue;
-                spawnedGoopObjects.push({ object: goop, expireAt: time + expireAfter });
+                spawnedGoopObjects.push({ object: goop, expireAt + expireAfter });
                 try { goop.method("set_colorHue").invoke(hue); } catch(_) {}
                 try { goop.method("set_colorSaturation").invoke(saturation); } catch(_) {}
                 try {
@@ -3044,7 +3044,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         return { ray: finalRay ?? NullObject, gunPointer, endPosition };
     }
     function getAllNetPlayersList(includeLocal = true)[] {
-        var players[] = [];
+        var players = [];
         try {
             var playerDict = NetPlayer.field("playerIDToNetPlayer").value;
             if (!playerDict || playerDict.isNull()) return players;
@@ -3117,7 +3117,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         return true;
     }
     function getAdminLeaderboardPlayerLabel(player, fallbackIndex = 0) {
-        var candidates[] = [];
+        var candidates = [];
         var push = (value) => {
             var token = normalizePlayerToken(value);
             if (isUsefulPlayerLabel(token) && !candidates.includes(token)) candidates.push(token);
@@ -3147,7 +3147,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         if (!arenaEspEnabled) destroyOverlayEntries(playerEspEntries);
     }
     function readPlayerTeamToken(player) {
-        var pushCandidates[] = [];
+        var pushCandidates = [];
         var push = (value) => {
             var token = normalizePlayerToken(value);
             if (token && token !== "?" && token !== "???") pushCandidates.push(token.toLowerCase());
@@ -3441,7 +3441,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         tf.method("set_rotation").invoke(Quaternion.method("Slerp").invoke(tf.method("get_rotation").invoke(), targetRot, Math.min(1.0, deltaTime * 20)));
     }
     function getAllLobbyItemGameObjects()[] {
-        var results[] = [];
+        var results = [];
         var seen = new Set();
         var pushItem = (obj) => {
             try {
@@ -3861,7 +3861,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
     function grabbableLooksLikeGun(grabbable) {
         try {
             if (!grabbable || grabbable.isNull?.()) return false;
-            var checks[] = [];
+            var checks = [];
             try { checks.push((grabbable.class?.type?.name ?? "").toLowerCase()); } catch(_) {}
             try {
                 var go = grabbable.method("get_gameObject").invoke();
@@ -3933,7 +3933,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         return false;
     }
     function getPlayerKickTokens(player)[] {
-        var tokens[] = [];
+        var tokens = [];
         var pushToken = (value) => {
             var token = normalizePlayerToken(value);
             if (!token || token === "?" || tokens.includes(token)) return;
@@ -3965,7 +3965,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
     function dumpPlayerInfoToTerminal(player) {
         try {
             if (!player || player.isNull?.()) return;
-            var lines[] = [];
+            var lines = [];
             var info = getPlayerIdentityInfo(player);
             lines.push("========================================");
             lines.push("[PlayerInfo] " + info.label);
@@ -4011,7 +4011,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         return score;
     }
     function getSingletonInstanceCandidates(klass)[] {
-        var results[] = [];
+        var results = [];
         var seen = new Set();
         var pushObj = (obj) => {
             try {
@@ -4375,7 +4375,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         return vfxTypeEntries[selectedVfxIndex];
     }
     function getRunnerCandidates()[] {
-        var results[] = [];
+        var results = [];
         var seen = new Set();
         var pushRunner = (runner) => {
             try {
@@ -4438,7 +4438,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         return null;
     }
     function tryInvokeVfxMethod(methodName, runner, vfxValue, pos) {
-        var variants[] = [
+        var variants = [
             [vfxValue, pos, identityQuaternion],
             [pos, vfxValue, identityQuaternion],
             [runner, vfxValue, pos, identityQuaternion],
@@ -4595,9 +4595,9 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
     }
     class ButtonInfo {
         buttonText;
-        method: () => void;
-        enableMethod: () => void;
-        disableMethod: () => void;
+        method: () => {
+        enableMethod: () => {
+        disableMethod: () => {
         isTogglable;
         toolTip?;
         enabled;
@@ -5414,7 +5414,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         var dumpPath = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Animal Company\\DabeansSkiddedMenuDump.txt";
         try {
             applyMenuStructurePatches();
-            var lines[] = [];
+            var lines = [];
             lines.push("Monkongs Cool Menu Dumps");
             lines.push("version=" + version);
             lines.push("themeMode=" + themeMode);
@@ -5551,7 +5551,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         _selfRPCBypass = true;
         try { fn(); } finally { _selfRPCBypass = false; }
     }
-    var buttons[] = [
+    var buttons = [
         [ 
             new ButtonInfo({
                 buttonText: "Settings",
@@ -7705,7 +7705,7 @@ new ButtonInfo({
                         ];
                         var goop = spawnItemAtPos("item_goop", spawnPos, identityQuaternion);
                         if (goop && !goop.isNull()) {
-                            spawnedGoopObjects.push({ object: goop, expireAt: time + 2.2 });
+                            spawnedGoopObjects.push({ object: goop, expireAt + 2.2 });
                             var vel = [
                                 (fx * 8.0) + ((Math.random() * 0.9) - 0.45),
                                 -1.0 + (Math.random() * 0.35),
@@ -7796,7 +7796,7 @@ new ButtonInfo({
                                 (center.field("z").value ) + Math.sin(angle) * 3.0
                             ];
                             var spawned = spawnMobAtPos(mob, pos, identityQuaternion) ;
-                            mobOrbitEntries.push({ mobEntry: mob, object: spawned ?? null, angle });
+                            mobOrbitEntries.push({ mobEntry: mob, object ?? null, angle });
                         }
                         for (var orb of mobOrbitEntries) {
                             try {
@@ -8048,7 +8048,7 @@ new ButtonInfo({
                                     var go = spawned.method("get_gameObject").invoke();
                                     if (!go || go.isNull()) continue;
                                     var tf = go.method("get_transform").invoke();
-                                    playerCageEntries.push({ player: p, transform: tf, offset });
+                                    playerCageEntries.push({ player: p, transform, offset });
                                 }
                             }
                         }
@@ -8348,7 +8348,7 @@ new ButtonInfo({
                 var go = no.method("get_gameObject").invoke();
                 if (!go) continue;
                 var tf = go.method("get_transform").invoke();
-                orbiters.push({ transform: tf, angle, height: heights[h] });
+                orbiters.push({ transform: tf, angle, height[h] });
               }
             }
           }
@@ -8445,7 +8445,7 @@ new ButtonInfo({
                 var go = no.method("get_gameObject").invoke();
                 if (!go) continue;
                 var tf = go.method("get_transform").invoke();
-                sellingTowerOrbiters.push({ transform: tf, angle, height: heights[h] });
+                sellingTowerOrbiters.push({ transform: tf, angle, height[h] });
               }
             }
           }
@@ -8723,7 +8723,7 @@ new ButtonInfo({
                         var count = sources.method("get_Count").invoke() ;
                         console.log("[DumpNetObj] â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•");
                         console.log("[DumpNetObj] NetworkObject prefab table â€” " + count + " entries:");
-                        var names[] = [];
+                        var names = [];
                         for (var i = 0; i < count; i++) {
                             try {
                                 var source = sources.method("get_Item").invoke(i);
@@ -13522,7 +13522,7 @@ new ButtonInfo({
                 method: () => {
                     if (!uxSelectedObject || uxSelectedObject.isNull()) { sendNotification("No object selected", false); return; }
                     try {
-                        var segments[] = [];
+                        var segments = [];
                         var tf = uxGetTransform(uxSelectedObject);
                         var guard = 0;
                         while (tf && !tf.isNull() && guard < 64) {
@@ -14588,7 +14588,7 @@ new ButtonInfo({
                         var gboUnhidden = 0;
                         var tf = uxGetTransform(uxSelectedObject);
                         if (!tf) { sendNotification("No transform on " + uxSelectedName, false); return; }
-                        var stack[] = [tf];
+                        var stack = [tf];
                         while (stack.length > 0) {
                             var cur = stack.pop();
                             try {
@@ -15517,7 +15517,7 @@ new ButtonInfo({
                         }
                         var mobID = mobList[(globalThis )._uxMobIdx];
                         var mobName = mobNames[(globalThis )._uxMobIdx];
-                        spawnMobAtPos({ name: mobName, id: mobID }, spawnPos, identityQuaternion);
+                        spawnMobAtPos({ name: mobName, id }, spawnPos, identityQuaternion);
                         sendNotification("Spawned " + mobName + " at your position!", false, 4);
                     } catch(e) { sendNotification("Spawn Mob: " + e, false); }
                 },

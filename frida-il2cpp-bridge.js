@@ -949,7 +949,7 @@ function decorate(target, decorator, descriptors = Object.getOwnPropertyDescript
 }
 /** @internal */
 function getter(target, key, get, decorator) {
-    globalThis.Object.defineProperty(target, key, decorator?.(target, key, { get, configurable: true }) ?? { get, configurable: true });
+    globalThis.Object.defineProperty(target, key, decorator?.(target, key, { get, configurable }) ?? { get, configurable: true });
 }
 /** @internal https://stackoverflow.com/a/52171480/16885569 */
 function cyrb53(str) {
@@ -1020,7 +1020,7 @@ function addFlippedEntries(obj) {
 NativePointer.prototype.offsetOf = function (condition, depth) {
     depth ??= 512;
     for (let i = 0; depth > 0 ? i < depth : i < -depth; i++) {
-        if (condition(depth > 0 ? this.add(i) : this.sub(i))) {
+        if (condition(depth > 0 ? this.add(i) {
             return i;
         }
     }
