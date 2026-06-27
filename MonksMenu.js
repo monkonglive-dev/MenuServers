@@ -450,7 +450,7 @@ var itemIDs = [
     "item_zipline_gun",
     "item_zombie_meat"
 ];
-var mobIDs: { name; id }[] = [
+var mobIDs = [
     { name: "Angler",              id: 1  },
     { name: "AnglerMad",           id: 2  },
     { name: "Armstrong",           id: 3  },
@@ -1603,7 +1603,7 @@ Il2Cpp.perform(() => {
         textSpawnedObjects = remaining;
         sendNotification("Cleared Hell Ore text: " + cleared, false);
     }
-    function trackPersistentMob(mobEntry: { name; id }, pos, rot, spawned) {
+    function trackPersistentMob(mobEntry, pos, rot, spawned) {
         try {
             persistentMobEntries.push({
                 mobEntry,
@@ -1722,7 +1722,7 @@ function acGetNetworkObjectSpawnDelegateRef() {
     }
     return acNetworkObjectSpawnDelegateRef;
 }
-function spawnMobAtPos(mobEntry: { name; id }, pos, rot) {
+function spawnMobAtPos(mobEntry, pos, rot) {
     var trackSpawnedMob = (spawned) => {
         try {
             if (spawned && !spawned.isNull?.()) {
@@ -2112,7 +2112,7 @@ function spawnMobAtPos(mobEntry: { name; id }, pos, rot) {
             try { getTransform(targetObj).method("set_localScale").invoke([worldScale, worldScale, worldScale]); } catch(_) {}
         }
     }
-    function addSurfaceOutline(surfaceObject, color: [number, number, number, number], thickness = 0.045) {
+    (surfaceObject, color: [number, number, number, number], thickness = 0.045) {
         if (!menuOutlineEnabled) return;
         return;
         var parent = getTransform(surfaceObject);
@@ -2130,7 +2130,7 @@ function spawnMobAtPos(mobEntry: { name; id }, pos, rot) {
             } catch(_) {}
         }
     }
-    function addRoundedCorners(surfaceObject, color: [number, number, number, number], radius = 0.022) {
+    (surfaceObject, color: [number, number, number, number], radius = 0.022) {
         if (!roundCornersEnabled) return;
         return;
         var parent = getTransform(surfaceObject);
@@ -2170,7 +2170,7 @@ function spawnMobAtPos(mobEntry: { name; id }, pos, rot) {
         currentNotification = text;
         if (requiresReload && !isOld) reloadMenu();
     }
-function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVector, primitiveType = 3, colorArr: [number, number, number, number] = [1, 1, 1, 1], parent = null, enableCollider = false) {
+(pos = zeroVector, rot = identityQuaternion, scale = oneVector, primitiveType = 3, colorArr: [number, number, number, number] = [1, 1, 1, 1], parent = null, enableCollider = false) {
     var obj = GameObject.method("CreatePrimitive").invoke(primitiveType);
     var renderer = getComponent(obj, Renderer);
     if (colorArr[3] == 0) {
@@ -2196,7 +2196,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
     transform.method("set_localScale").invoke(scale);
     return obj;
 }
-    function setRendererColorSafe(obj, color: [number, number, number, number]) {
+    (obj, color: [number, number, number, number]) {
         try {
             if (!obj || obj.isNull?.()) return;
             var renderer = getComponent(obj, Renderer);
@@ -2205,7 +2205,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
             if (material && !material.isNull?.()) material.method("set_color").invoke(color);
         } catch(_) {}
     }
-    function setTextColorSafe(obj, color: [number, number, number, number]) {
+    (obj, color: [number, number, number, number]) {
         try {
             if (!obj || obj.isNull?.()) return;
             try {
@@ -2262,7 +2262,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
     function smoothNumber(current, target, amount = 0.18) {
         return current + ((target - current) * amount);
     }
-    function smoothVec3(state: [number, number, number], target: [number, number, number], amount = 0.18) {
+    (state: [number, number, number], target: [number, number, number], amount = 0.18) {
         state[0] = smoothNumber(state[0], target[0], amount);
         state[1] = smoothNumber(state[1], target[1], amount);
         state[2] = smoothNumber(state[2], target[2], amount);
@@ -2681,7 +2681,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
             }
         } catch(_) {}
     }
-    function createSolidPlatform(pos, scale: [number, number, number] = [0.35, 0.03, 0.35], color: [number, number, number, number] = [1.0, 0.55, 0.08, 0.9]) {
+    (pos, scale: [number, number, number] = [0.35, 0.03, 0.35], color: [number, number, number, number] = [1.0, 0.55, 0.08, 0.9]) {
         var obj = createObject(pos, identityQuaternion, scale, 3, color, null, true);
         try {
             var col = getComponent(obj, Collider);
@@ -2692,7 +2692,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         } catch(_) {}
         return obj;
     }
-    function renderMenuText(textRootObject, surfaceObject, text = "", color: [number, number, number, number] = [1, 1, 1, 1], pos = zeroVector, size = oneVector) {
+    (textRootObject, surfaceObject, text = "", color: [number, number, number, number] = [1, 1, 1, 1], pos = zeroVector, size = oneVector) {
         if (!TextMesh && !TextMeshPro3D) {
             if (!menuFontWarned) {
                 menuFontWarned = true;
@@ -3352,7 +3352,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         } catch(_) {}
         return [0, 0, 1];
     }
-    function getLookRotationFromForward(forward: [number, number, number]) {
+    (forward: [number, number, number]) {
         try { return Quaternion.method("LookRotation", 2).invoke(forward, [0, 1, 0]); } catch(_) {}
         try { return Quaternion.method("LookRotation", 1).invoke(forward); } catch(_) {}
         return identityQuaternion;
@@ -3534,7 +3534,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
     function getPlayerOverlayKey(player) {
         try { return normalizeSceneObjectHandle(player) || getPlayerName(player) || String(player); } catch(_) { return String(player); }
     }
-    function configureOverlayMaterial(material, color: [number, number, number, number]) {
+    (material, color: [number, number, number, number]) {
         try {
             if (!material || material.isNull?.()) return;
             try { material.method("set_shader").invoke(TextShader); } catch(_) { try { material.method("set_shader").invoke(UberShader); } catch(_) {} }
@@ -3545,7 +3545,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
             try { material.method("set_renderQueue").invoke(5000); } catch(_) {}
         } catch(_) {}
     }
-    function configureOverlayRenderer(renderer, color: [number, number, number, number]) {
+    (renderer, color: [number, number, number, number]) {
         try {
             if (!renderer || renderer.isNull?.()) return;
             try { renderer.method("set_sortingOrder").invoke(32767); } catch(_) {}
@@ -4654,7 +4654,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
             };
             var getSearchMatches = () => {
                 var query = modSearchQuery.trim().toLowerCase();
-                var matches: { text, category, page }[] = [];
+                var matches = [];
                 if (query.length === 0) return matches;
                 for (var category = 0; category < buttons.length; category++) {
                     if (category === 29 || category === 30 || category === 31 || category === 32) continue;
