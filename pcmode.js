@@ -18,7 +18,7 @@
         var xrCreateInstance = openxrLoader.findExportByName("xrCreateInstance");
         if (xrCreateInstance) {
             Interceptor.attach(xrCreateInstance, {
-                onEnter: function(args[]) {
+                onEnter: function(args) {
                     console.log("[PCMode] Intercepted xrCreateInstance");
                 },
                 onLeave: function(retval) {
@@ -30,7 +30,7 @@
         var xrGetSystemProperties = openxrLoader.findExportByName("xrGetSystemProperties");
         if (xrGetSystemProperties) {
             Interceptor.attach(xrGetSystemProperties, {
-                onEnter: function(args[]) {
+                onEnter: function(args) {
                     // args[1] = systemId, args[2] = XrSystemProperties output
                     if (!args[2].isNull()) {
                         // XrSystemProperties.type = XR_TYPE_SYSTEM_PROPERTIES (4)
@@ -64,7 +64,7 @@
         var xrLocateSpace = openxrLoader.findExportByName("xrLocateSpace");
         if (xrLocateSpace) {
             Interceptor.attach(xrLocateSpace, {
-                onEnter: function(args[]) {
+                onEnter: function(args) {
                     // args[3] = XrSpaceLocation output
                     if (!args[3].isNull()) {
                         // XrSpaceLocation.type = XR_TYPE_SPACE_LOCATION (3)
@@ -114,7 +114,7 @@
         var xrGetActionStateBoolean = openxrLoader.findExportByName("xrGetActionStateBoolean");
         if (xrGetActionStateBoolean) {
             Interceptor.attach(xrGetActionStateBoolean, {
-                onEnter: function(args[]) {
+                onEnter: function(args) {
                     // args[3] = XrActionStateBoolean output
                     if (!args[3].isNull()) {
                         args[3].writeU32(1); // type = XR_TYPE_ACTION_STATE_BOOLEAN
@@ -131,7 +131,7 @@
         var xrGetInstanceProcAddr = openxrLoader.findExportByName("xrGetInstanceProcAddr");
         if (xrGetInstanceProcAddr) {
             Interceptor.attach(xrGetInstanceProcAddr, {
-                onEnter: function(args[]) {
+                onEnter: function(args) {
                     console.log("[PCMode] xrGetInstanceProcAddr called for: " + args[1].readUtf16String());
                 }
             });

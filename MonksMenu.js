@@ -1142,8 +1142,8 @@ Il2Cpp.perform(() => {
         if (parent != null) transform.method("SetParent", 2).invoke(parent, false);
         return obj;
     }
-    function invokeInstance(method, instance, ...args[]) { return method.invokeRaw(instance, ...args); }
-    function tryMethodName(klass, names[], parameterCount = -1) {
+    function invokeInstance(method, instance, ...args) { return method.invokeRaw(instance, ...args); }
+    function tryMethodName(klass, names, parameterCount = -1) {
         for (var name of names) {
             try { return parameterCount >= 0 ? klass.method(name, parameterCount) : klass.method(name); }
             catch(_) {}
@@ -1925,7 +1925,7 @@ function spawnMobAtPos(mobEntry: { name; id }, pos, rot) {
         adminSpawnerMobPrefabs = found;
         return found;
     }
-    function cleanupDeadTrackedObjects(list[]) {
+    function cleanupDeadTrackedObjects(list) {
         for (var i = list.length - 1; i >= 0; i--) {
             var obj = list[i];
             if (!obj || obj.isNull?.()) list.splice(i, 1);
@@ -4162,7 +4162,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
             return false;
         }
     }
-    function tryCallNames(obj, names[], parameterCount = -1, ...args[]) {
+    function tryCallNames(obj, names, parameterCount = -1, ...args) {
         try {
             if (!obj || obj.isNull?.()) return false;
             for (var name of names) {
@@ -8595,7 +8595,7 @@ new ButtonInfo({
         disableMethod: () => { rapidFireEnabled = false; },
         method: () => {
           try {
-            var pulseMethod = (held, names[], parameterCount, ...args[]) => {
+            var pulseMethod = (held, names, parameterCount, ...args) => {
               for (var name of names) {
                 try {
                   var method = tryMethodName(held.class, [name], parameterCount);
@@ -17209,7 +17209,7 @@ try {
         return invokeInstance(shotgunHandleUse, this);
     };
 } catch(e) { console.error("[NoShotgunCooldown] Shotgun.HandleUse hook failed:", e); }
-function installMultiBuyHookOnClass(klass, methodNames[]) {
+function installMultiBuyHookOnClass(klass, methodNames) {
     if (!klass) return;
     var spawnExtraPurchaseCopiesFromResult = (result, loops) => {
         try {
@@ -17238,7 +17238,7 @@ function installMultiBuyHookOnClass(klass, methodNames[]) {
         try {
             var method = tryMethodName(klass, [methodName]);
             if (!method) continue;
-            method.implementation = function(...args[]) {
+            method.implementation = function(...args) {
                 if (!multiBuyEnabled || multiBuyAmount <= 1 || multiBuyHookGuard) {
                     return invokeInstance(method, this, ...args);
                 }

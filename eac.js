@@ -102,7 +102,7 @@ Il2Cpp.perform(() => {
     try {
         const addr = baseAddr.add(0x69FA30);
         Interceptor.attach(addr, {
-            onEnter: function(args[]) {
+            onEnter: function(args) {
                 eacManagerInstance = args[0];
                 log("Captured EACClientManager instance: " + eacManagerInstance);
             },
@@ -119,7 +119,7 @@ Il2Cpp.perform(() => {
     try {
         const addr = baseAddr.add(0x6B0640);
         Interceptor.attach(addr, {
-            onEnter: function(args[]) {
+            onEnter: function(args) {
                 const d13Instance = args[0];
                 // <>4__this (EACClientManager) is at offset 0x20 inside d__13
                 const manager = d13Instance.add(0x20).readPointer();
