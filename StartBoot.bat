@@ -67,63 +67,52 @@ goto getkey
 cls
 echo.
 echo  %ESC%[93mFetching scripts from server...%ESC%[0m
-call :runInject eac
-pause >nul
-goto menu
+goto do_download_eac
 
 :selected_2
 cls
 echo.
 echo  %ESC%[93mFetching scripts from server...%ESC%[0m
-call :runInject quest
-pause >nul
-goto menu
+goto do_download_quest
 
 :selected_3
 cls
 echo.
 echo  %ESC%[93mFetching scripts from server...%ESC%[0m
-call :runInject all
-pause >nul
-goto menu
+goto do_download_all
 
-:runInject
+:do_download_eac
 set "SCRIPTDIR=%TEMP%\monkong_scripts"
-if exist "%SCRIPTDIR%" rmdir /s /q "%SCRIPTDIR%"
-mkdir "%SCRIPTDIR%" >nul 2>&1
-
 set "BASE=https://raw.githubusercontent.com/monkonglive-dev/MenuServers/main"
 set "CB=%RANDOM%"
-set "MODE=%~1"
-
+set "MODE=eac"
+if exist "%SCRIPTDIR%" rmdir /s /q "%SCRIPTDIR%"
+mkdir "%SCRIPTDIR%" >nul 2>&1
 echo  %ESC%[96mDownloading scripts...%ESC%[0m
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$base='%BASE%'; $d='%SCRIPTDIR%'; $v='%CB%'; $files=@(@('01_bridge.js','frida-il2cpp-bridge.js'),('02_symbols.js','symbols.js'),('03_eac.js','Bypassed/eac.js'),('04_stuff.js','Bypassed/stuff.js')); foreach($f in $files){try{$r=Invoke-WebRequest -Uri \"$base/$($f[1])?v=$v\" -UseBasicParsing -TimeoutSec 15;[IO.File]::WriteAllText(\"$d\$($f[0])\",$r.Content);Write-Host \"  [+] Downloaded: $($f[0])\"}catch{Write-Host \"  [!] Failed: $($f[0])\"}}"
+goto do_inject
 
-REM Bridge FIRST
-call :download "%BASE%/frida-il2cpp-bridge.js?v=%CB%" "%SCRIPTDIR%\01_bridge.js"
-REM Symbols second
-call :download "%BASE%/symbols.js?v=%CB%" "%SCRIPTDIR%\02_symbols.js"
-REM EAC bypass third
-call :download "%BASE%/Bypassed/eac.js?v=%CB%" "%SCRIPTDIR%\03_eac.js"
+:do_download_quest
+set "SCRIPTDIR=%TEMP%\monkong_scripts"
+set "BASE=https://raw.githubusercontent.com/monkonglive-dev/MenuServers/main"
+set "CB=%RANDOM%"
+set "MODE=quest"
+if exist "%SCRIPTDIR%" rmdir /s /q "%SCRIPTDIR%"
+mkdir "%SCRIPTDIR%" >nul 2>&1
+echo  %ESC%[96mDownloading scripts...%ESC%[0m
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$base='%BASE%'; $d='%SCRIPTDIR%'; $v='%CB%'; $files=@(@('01_bridge.js','frida-il2cpp-bridge.js'),('02_symbols.js','symbols.js'),('03_eac.js','Bypassed/eac.js'),('04_stuff.js','Bypassed/stuff.js'),('05_quest.js','m4quest.js')); foreach($f in $files){try{$r=Invoke-WebRequest -Uri \"$base/$($f[1])?v=$v\" -UseBasicParsing -TimeoutSec 15;[IO.File]::WriteAllText(\"$d\$($f[0])\",$r.Content);Write-Host \"  [+] Downloaded: $($f[0])\"}catch{Write-Host \"  [!] Failed: $($f[0])\"}}"
+goto do_inject
 
-if "%MODE%"=="eac" goto :load_eac
-if "%MODE%"=="quest" goto :load_quest
-if "%MODE%"=="all" goto :load_all
-
-:load_eac
-call :download "%BASE%/Bypassed/stuff.js?v=%CB%" "%SCRIPTDIR%\04_stuff.js"
-goto :do_inject
-
-:load_quest
-call :download "%BASE%/Bypassed/stuff.js?v=%CB%" "%SCRIPTDIR%\04_stuff.js"
-call :download "%BASE%/m4quest.js?v=%CB%" "%SCRIPTDIR%\05_quest.js"
-goto :do_inject
-
-:load_all
-call :download "%BASE%/Bypassed/stuff.js?v=%CB%" "%SCRIPTDIR%\04_stuff.js"
-call :download "%BASE%/MonksMenu.js?v=%CB%" "%SCRIPTDIR%\05_menu.js"
-call :download "%BASE%/m4quest.js?v=%CB%" "%SCRIPTDIR%\06_quest.js"
-call :download "%BASE%/discordrpc.js?v=%CB%" "%SCRIPTDIR%\07_rpc.js"
-goto :do_inject
+:do_download_all
+set "SCRIPTDIR=%TEMP%\monkong_scripts"
+set "BASE=https://raw.githubusercontent.com/monkonglive-dev/MenuServers/main"
+set "CB=%RANDOM%"
+set "MODE=all"
+if exist "%SCRIPTDIR%" rmdir /s /q "%SCRIPTDIR%"
+mkdir "%SCRIPTDIR%" >nul 2>&1
+echo  %ESC%[96mDownloading scripts...%ESC%[0m
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$base='%BASE%'; $d='%SCRIPTDIR%'; $v='%CB%'; $files=@(@('01_bridge.js','frida-il2cpp-bridge.js'),('02_symbols.js','symbols.js'),('03_eac.js','Bypassed/eac.js'),('04_stuff.js','Bypassed/stuff.js'),('05_menu.js','MonksMenu.js'),('06_quest.js','m4quest.js'),('07_rpc.js','discordrpc.js')); foreach($f in $files){try{$r=Invoke-WebRequest -Uri \"$base/$($f[1])?v=$v\" -UseBasicParsing -TimeoutSec 15;[IO.File]::WriteAllText(\"$d\$($f[0])\",$r.Content);Write-Host \"  [+] Downloaded: $($f[0])\"}catch{Write-Host \"  [!] Failed: $($f[0])\"}}"
+goto do_inject
 
 :do_inject
 echo.
@@ -143,9 +132,9 @@ for %%f in ("%SCRIPTDIR%\*.js") do (
 frida -n "animalcompany.exe" --runtime=v8 !FRIDA_ARGS!
 
 echo.
-if "%MODE%"=="eac" (
+if "!MODE!"=="eac" (
     echo  %ESC%[92mSuccessfully sideloaded EAC Defuser!%ESC%[0m
-) else if "%MODE%"=="quest" (
+) else if "!MODE!"=="quest" (
     echo  %ESC%[92mSuccessfully sideloaded M4Quest!%ESC%[0m
 ) else (
     echo  %ESC%[92mSuccessfully sideloaded everything!%ESC%[0m
@@ -153,13 +142,5 @@ if "%MODE%"=="eac" (
 echo.
 echo  %ESC%[93mCleaning up...%ESC%[0m
 rmdir /s /q "%SCRIPTDIR%" >nul 2>&1
-exit /b
-
-:download
-powershell -NoProfile -ExecutionPolicy Bypass -Command "try { $r = Invoke-WebRequest -Uri '%~1' -UseBasicParsing -TimeoutSec 15; [IO.File]::WriteAllText('%~2', $r.Content) } catch { Write-Host '  [!] Failed: %~nx1' }"
-if exist "%~2" (
-    echo  %ESC%[92m[+] Downloaded: %~nx2%ESC%[0m
-) else (
-    echo  %ESC%[91m[!] Failed: %~nx2%ESC%[0m
-)
-exit /b
+pause >nul
+goto menu
