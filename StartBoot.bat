@@ -101,39 +101,40 @@ if exist "%SCRIPTDIR%" rmdir /s /q "%SCRIPTDIR%"
 mkdir "%SCRIPTDIR%" >nul 2>&1
 
 set "BASE=https://raw.githubusercontent.com/monkonglive-dev/MenuServers/main"
+set "CB=%RANDOM%"
 set "MODE=%~1"
 
 echo  %ESC%[96mDownloading scripts...%ESC%[0m
 
 REM Bridge FIRST
-call :download "%BASE%/frida-il2cpp-bridge.js" "%SCRIPTDIR%\01_bridge.js"
+call :download "%BASE%/frida-il2cpp-bridge.js?v=%CB%" "%SCRIPTDIR%\01_bridge.js"
 REM Symbols second
-call :download "%BASE%/symbols.js" "%SCRIPTDIR%\02_symbols.js"
+call :download "%BASE%/symbols.js?v=%CB%" "%SCRIPTDIR%\02_symbols.js"
 REM EAC bypass third
-call :download "%BASE%/Bypassed/eac.js" "%SCRIPTDIR%\03_eac.js"
+call :download "%BASE%/Bypassed/eac.js?v=%CB%" "%SCRIPTDIR%\03_eac.js"
 
 if "%MODE%"=="eac" goto :load_eac
 if "%MODE%"=="pcmode" goto :load_pcmode
 if "%MODE%"=="quest" goto :load_quest
 
 REM all mode
-call :download "%BASE%/Bypassed/stuff.js" "%SCRIPTDIR%\04_stuff.js"
-call :download "%BASE%/MonksMenu.js" "%SCRIPTDIR%\05_menu.js"
-call :download "%BASE%/m4quest.js" "%SCRIPTDIR%\06_quest.js"
-call :download "%BASE%/discordrpc.js" "%SCRIPTDIR%\07_rpc.js"
+call :download "%BASE%/Bypassed/stuff.js?v=%CB%" "%SCRIPTDIR%\04_stuff.js"
+call :download "%BASE%/MonksMenu.js?v=%CB%" "%SCRIPTDIR%\05_menu.js"
+call :download "%BASE%/m4quest.js?v=%CB%" "%SCRIPTDIR%\06_quest.js"
+call :download "%BASE%/discordrpc.js?v=%CB%" "%SCRIPTDIR%\07_rpc.js"
 goto :do_inject
 
 :load_eac
-call :download "%BASE%/Bypassed/stuff.js" "%SCRIPTDIR%\04_stuff.js"
+call :download "%BASE%/Bypassed/stuff.js?v=%CB%" "%SCRIPTDIR%\04_stuff.js"
 goto :do_inject
 
 :load_pcmode
-call :download "%BASE%/Bypassed/stuff.js" "%SCRIPTDIR%\04_stuff.js"
-call :download "%BASE%/pcmode.js" "%SCRIPTDIR%\05_pcmode.js"
+call :download "%BASE%/Bypassed/stuff.js?v=%CB%" "%SCRIPTDIR%\04_stuff.js"
+call :download "%BASE%/pcmode.js?v=%CB%" "%SCRIPTDIR%\05_pcmode.js"
 goto :do_inject
 
 :load_quest
-call :download "%BASE%/m4quest.js" "%SCRIPTDIR%\04_quest.js"
+call :download "%BASE%/m4quest.js?v=%CB%" "%SCRIPTDIR%\04_quest.js"
 goto :do_inject
 
 :do_inject
