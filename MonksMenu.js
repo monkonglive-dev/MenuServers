@@ -86,7 +86,7 @@ function uxVec3Str(v) {
         return `(${x}, ${y}, ${z})`;
     } catch(_) { return "(?,?,?)"; }
 }
-function uxGetComponentNames(go)[] {
+function uxGetComponentNames(go) {
     var names = [];
     try {
         var comps = go.method("GetComponentsInChildren", 1)
@@ -1275,7 +1275,7 @@ Il2Cpp.perform(() => {
     ];
     var TEXT_SPAWN_BLUEPRINT_PATH = "C:\\Users\\Dawid Jurek\\Downloads\\blueprint.json";
     var TEXT_SPAWN_SCALE = 0.16;
-    function readTextBlueprintPieces()[] {
+    function readTextBlueprintPieces() {
         if (textBlueprintCache && textBlueprintCache.length > 0) return textBlueprintCache;
         var parsedPieces = [];
         try {
@@ -1866,7 +1866,7 @@ function spawnMobAtPos(mobEntry: { name; id }, pos, rot) {
         } catch(e) { console.error("spawnNetworkPrefab error: " + e); }
         return null;
     }
-    function getNetworkPrefabDescriptions()[] {
+    function getNetworkPrefabDescriptions() {
         var names = [];
         try {
             var runner = PrefabGen.field("_instance").value.method("get_runner").invoke();
@@ -1895,7 +1895,7 @@ function spawnMobAtPos(mobEntry: { name; id }, pos, rot) {
             return String(desc);
         }
     }
-    function scanExistingMobPrefabs()[] {
+    function scanExistingMobPrefabs() {
         var found = [];
         var seen = new Set();
         var knownMobNames = new Set();
@@ -2318,7 +2318,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         } catch(_) {}
         try { return getTransform(player); } catch(_) { return null; }
     }
-    function collectAllLobbyItemsWithHeld()[] {
+    function collectAllLobbyItemsWithHeld() {
         var results = getAllLobbyItemGameObjects();
         var seen = new Set();
         var finalItems = [];
@@ -3043,7 +3043,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         }
         return { ray: finalRay ?? NullObject, gunPointer, endPosition };
     }
-    function getAllNetPlayersList(includeLocal = true)[] {
+    function getAllNetPlayersList(includeLocal = true) {
         var players = [];
         try {
             var playerDict = NetPlayer.field("playerIDToNetPlayer").value;
@@ -3440,7 +3440,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         tf.method("set_position").invoke(Vector3.method("Lerp").invoke(tf.method("get_position").invoke(), targetPos, Math.min(1.0, deltaTime * 22)));
         tf.method("set_rotation").invoke(Quaternion.method("Slerp").invoke(tf.method("get_rotation").invoke(), targetRot, Math.min(1.0, deltaTime * 20)));
     }
-    function getAllLobbyItemGameObjects()[] {
+    function getAllLobbyItemGameObjects() {
         var results = [];
         var seen = new Set();
         var pushItem = (obj) => {
@@ -3873,7 +3873,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
             return false;
         }
     }
-    function getSelectedItemNeedles(bareID)[] {
+    function getSelectedItemNeedles(bareID) {
         var values = new Set();
         var add = (v) => {
             var t = (v ?? "").toLowerCase().trim();
@@ -3932,7 +3932,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         } catch(_) {}
         return false;
     }
-    function getPlayerKickTokens(player)[] {
+    function getPlayerKickTokens(player) {
         var tokens = [];
         var pushToken = (value) => {
             var token = normalizePlayerToken(value);
@@ -4010,7 +4010,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         if (token.toLowerCase().indexOf("player") >= 0) score -= 2;
         return score;
     }
-    function getSingletonInstanceCandidates(klass)[] {
+    function getSingletonInstanceCandidates(klass) {
         var results = [];
         var seen = new Set();
         var pushObj = (obj) => {
@@ -4374,7 +4374,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         if (selectedVfxIndex < 0 || selectedVfxIndex >= vfxTypeEntries.length) selectedVfxIndex = 0;
         return vfxTypeEntries[selectedVfxIndex];
     }
-    function getRunnerCandidates()[] {
+    function getRunnerCandidates() {
         var results = [];
         var seen = new Set();
         var pushRunner = (runner) => {
@@ -4492,7 +4492,7 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
         } catch(_) {}
         return false;
     }
-    function getDynamicVfxMethodNames()[] {
+    function getDynamicVfxMethodNames() {
         if (vfxMethodNamesCache) return vfxMethodNamesCache;
         var names = new Set([
             "RPC_PlayVFX", "PlayVFX", "SpawnVFX", "TriggerVFX", "PlayEffect", "SpawnEffect",
