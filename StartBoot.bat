@@ -127,8 +127,11 @@ goto :do_inject
 
 :do_inject
 echo.
-echo  %ESC%[93mPress any key to attach to game...%ESC%[0m
-pause >nul
+echo  %ESC%[93mLoad into the game, then press M to inject...%ESC%[0m
+
+:wait_m
+for /f "delims=" %%A in ('powershell -NoProfile -Command "$k = $host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown'); Write-Output $k.VirtualKeyCode"') do set "key=%%A"
+if not "!key!"=="77" goto wait_m
 
 echo  %ESC%[96mInjecting scripts...%ESC%[0m
 
