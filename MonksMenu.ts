@@ -7270,6 +7270,52 @@ new ButtonInfo({
               isTogglable: true,
               toolTip: "Spams the selected VFX at your gun pointer."
             }),
+            new ButtonInfo({
+              buttonText: "VFX Burst Gun",
+              method: () => {
+                if (!rightGrab) return;
+                const gunData = renderGun();
+                const ray = gunData.ray;
+                if (!rightTrigger) return;
+                if (time <= lagGunDelay) return;
+                lagGunDelay = time + 0.5;
+                try {
+                    const basePos = (ray && !ray.isNull?.())
+                        ? ray.method("get_point").invoke()
+                        : getTransform(gunData.gunPointer).method("get_position").invoke();
+                    const runner = getPrimaryVfxRunner();
+                    if (!runner || runner.isNull?.()) return;
+                    const allVfxValues: number[] = Object.keys(VFXTypes)
+                        .filter(k => isNaN(Number(k)) && (VFXTypes as any)[k] !== 255)
+                        .map(k => (VFXTypes as any)[k] as number);
+                    for (let i = 0; i < 6; i++) {
+                        try {
+                            const vfxVal = allVfxValues[Math.floor(Math.random() * allVfxValues.length)];
+                            const randVec = Vector3.method("op_Addition", 2).invoke(
+                                Vector3.method("op_Addition", 2).invoke(
+                                    Vector3.method("op_Multiply", 2).invoke(
+                                        Vector3.method("get_right").invoke(),
+                                        (Math.random() - 0.5) * 10
+                                    ),
+                                    Vector3.method("op_Multiply", 2).invoke(
+                                        Vector3.method("get_up").invoke(),
+                                        Math.random() * 4
+                                    )
+                                ),
+                                Vector3.method("op_Multiply", 2).invoke(
+                                    Vector3.method("get_forward").invoke(),
+                                    (Math.random() - 0.5) * 10
+                                )
+                            );
+                            const sp = Vector3.method("op_Addition", 2).invoke(basePos, randVec);
+                            tryDirectPlayVfx(runner, vfxVal, sp);
+                        } catch(_) {}
+                    }
+                } catch(e) {}
+              },
+              isTogglable: true,
+              toolTip: "Bursts 6 random server-sided VFX around your gun pointer."
+            }),
       new ButtonInfo({
         buttonText: "Stinky Gun",
         method: () => {
