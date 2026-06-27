@@ -7,12 +7,6 @@ title Monkongs SideLoader
 reg add "HKCU\Console" /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
 for /f "delims=" %%E in ('echo prompt $E ^| cmd') do set "ESC=%%E"
 
-echo Setting up paths...
-set "PATH=%PATH%;%APPDATA%\Python\Python312\Scripts"
-set "PATH=%PATH%;%LOCALAPPDATA%\Programs\Python\Python313\Scripts"
-set "PATH=%PATH%;C:\Users\%USERNAME%\AppData\Local\Python\pythoncore-3.14-64\Scripts"
-set "PATH=%PATH%;%LOCALAPPDATA%\Python\pythoncore-3.14-64\Scripts"
-
 echo.
 echo %ESC%[91m----------------------------------%ESC%[0m
 echo %ESC%[93mInstalling dependencies...%ESC%[0m
@@ -102,7 +96,75 @@ pause >nul
 goto menu
 
 :runInject
-set "PYTEMP=%TEMP%\monkong_%RANDOM%.py"
-powershell -NoProfile -ExecutionPolicy Bypass -Command "[IO.File]::WriteAllText('%PYTEMP%', [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('aW1wb3J0IGZyaWRhLCBzeXMsIG9zLCB1cmxsaWIucmVxdWVzdCwgdGltZQoKQkFTRSA9ICJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vbW9ua29uZ2xpdmUtZGV2L01lbnVTZXJ2ZXJzL21haW4iCgpkZWYgZmV0Y2godXJsKToKICAgIHRyeToKICAgICAgICByID0gdXJsbGliLnJlcXVlc3QuUmVxdWVzdChCQVNFICsgdXJsLCBoZWFkZXJzPXsiVXNlci1BZ2VudCI6ICJNb25rc01lbnUvMS4wIn0pCiAgICAgICAgcmV0dXJuIHVybGxpYi5yZXF1ZXN0LnVybG9wZW4ociwgdGltZW91dD0xNSkucmVhZCgpLmRlY29kZSgidXRmLTgiKQogICAgZXhjZXB0IEV4Y2VwdGlvbiBhcyBlOgogICAgICAgIHByaW50KCIgIFshXSBGYWlsZWQ6ICIgKyB1cmwgKyAiIC0+ICIgKyBzdHIoZSkpCiAgICAgICAgcmV0dXJuIE5vbmUKCm1vZGUgPSBzeXMuYXJndlsxXSBpZiBsZW4oc3lzLmFyZ3YpID4gMSBlbHNlICJtZW51IgpwcmludCgiXG5bKl0gTW9kZTogIiArIG1vZGUudXBwZXIoKSkKCnVybHMgPSBbXQp1cmxzLmFwcGVuZCgiL0J5cGFzc2VkL2VhYy5qcyIpCgppZiBtb2RlIGluIFsiZWFjIiwgImFsbCIsICJwY21vZGUiXToKICAgIHVybHMuYXBwZW5kKCIvQnlwYXNzZWQvc3R1ZmYuanMiKQoKdXJscy5hcHBlbmQoIi9mcmlkYS1pbDJjcHAtYnJpZGdlLmpzIikKdXJscy5hcHBlbmQoIi9zeW1ib2xzLmpzIikKCmlmIG1vZGUgaW4gWyJtZW51IiwgImFsbCJdOgogICAgdXJscy5hcHBlbmQoIi9Nb25rc01lbnUuanMiKQppZiBtb2RlIGluIFsicXVlc3QiLCAiYWxsIl06CiAgICB1cmxzLmFwcGVuZCgiL200cXVlc3QuanMiKQppZiBtb2RlIGluIFsicGNtb2RlIl06CiAgICB1cmxzLmFwcGVuZCgiL3BjbW9kZS5qcyIpCmlmIG1vZGUgPT0gImFsbCI6CiAgICB1cmxzLmFwcGVuZCgiL2Rpc2NvcmRycGMuanMiKQoKcHJpbnQoIlsqXSBTY3JpcHRzIHRvIGxvYWQ6ICIgKyBzdHIodXJscykpCnByaW50KCJbKl0gUHJlc3MgYW55IGtleSB0byBhdHRhY2ggdG8gZ2FtZS4uLiIpCmlucHV0KCkKCmRldmljZSA9IGZyaWRhLmdldF9sb2NhbF9kZXZpY2UoKQoKcGlkID0gTm9uZQpmb3IgcHJvYyBpbiBkZXZpY2UuZW51bWVyYXRlX3Byb2Nlc3NlcygpOgogICAgaWYgcHJvYy5uYW1lLmxvd2VyKCkgPT0gImFuaW1hbGNvbXBhbnkuZXhlIjoKICAgICAgICBwaWQgPSBwcm9jLnBpZAogICAgICAgIGJyZWFrCgppZiBub3QgcGlkOgogICAgcHJpbnQoIlshXSBhbmltYWxjb21wYW55LmV4ZSBub3QgZm91bmQuIFN0YXJ0IHRoZSBnYW1lIGZpcnN0LiIpCiAgICBzeXMuZXhpdCgxKQoKcHJpbnQoIlsqXSBBdHRhY2hpbmcgdG8gUElEOiAiICsgc3RyKHBpZCkpCnNlc3Npb24gPSBkZXZpY2UuYXR0YWNoKHBpZCkKCmZvciB1cmwgaW4gdXJsczoKICAgIGNvZGUgPSBmZXRjaCh1cmwpCiAgICBpZiBjb2RlOgogICAgICAgIHRyeToKICAgICAgICAgICAgcyA9IHNlc3Npb24uY3JlYXRlX3NjcmlwdChjb2RlKQogICAgICAgICAgICBzLmxvYWQoKQogICAgICAgICAgICBwcmludCgiWytdIExvYWRlZDogIiArIHVybCkKICAgICAgICBleGNlcHQgRXhjZXB0aW9uIGFzIGU6CiAgICAgICAgICAgIHByaW50KCJbIV0gRmFpbGVkOiAiICsgdXJsICsgIiAtPiAiICsgc3RyKGUpKQogICAgZWxzZToKICAgICAgICBwcmludCgiWyFdIENvdWxkIG5vdCBmZXRjaDogIiArIHVybCkKCnByaW50KCJbKl0gRG9uZSEiKQp0aW1lLnNsZWVwKDIpCg==')))"
-python "%PYTEMP%" %1
-del /f /q "%PYTEMP%" >nul 2>&1
+set "SCRIPTDIR=%TEMP%\monkong_scripts"
+if exist "%SCRIPTDIR%" rmdir /s /q "%SCRIPTDIR%"
+mkdir "%SCRIPTDIR%" >nul 2>&1
+
+set "BASE=https://raw.githubusercontent.com/monkonglive-dev/MenuServers/main"
+set "SCRIPTS="
+
+echo  %ESC%[96mDownloading scripts...%ESC%[0m
+
+REM Always: eac first, bridge, symbols
+call :download "%BASE%/Bypassed/eac.js" "%SCRIPTDIR%\01_eac.js"
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\01_eac.js""
+
+if "%1"=="eac" goto :extra_eac
+if "%1"=="pcmode" goto :extra_pcmode
+if "%1"=="quest" goto :extra_quest
+
+REM all mode
+call :download "%BASE%/Bypassed/stuff.js" "%SCRIPTDIR%\02_stuff.js"
+call :download "%BASE%/MonksMenu.js" "%SCRIPTDIR%\03_menu.js"
+call :download "%BASE%/m4quest.js" "%SCRIPTDIR%\04_quest.js"
+call :download "%BASE%/pcmode.js" "%SCRIPTDIR%\05_pcmode.js"
+call :download "%BASE%/discordrpc.js" "%SCRIPTDIR%\06_rpc.js"
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\02_stuff.js""
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\03_menu.js""
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\04_quest.js""
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\05_pcmode.js""
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\06_rpc.js""
+goto :add_bridge
+
+:extra_eac
+call :download "%BASE%/Bypassed/stuff.js" "%SCRIPTDIR%\02_stuff.js"
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\02_stuff.js""
+goto :add_bridge
+
+:extra_pcmode
+call :download "%BASE%/Bypassed/stuff.js" "%SCRIPTDIR%\02_stuff.js"
+call :download "%BASE%/pcmode.js" "%SCRIPTDIR%\03_pcmode.js"
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\02_stuff.js""
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\03_pcmode.js""
+goto :add_bridge
+
+:extra_quest
+call :download "%BASE%/m4quest.js" "%SCRIPTDIR%\02_quest.js"
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\02_quest.js""
+goto :add_bridge
+
+:add_bridge
+call :download "%BASE%/frida-il2cpp-bridge.js" "%SCRIPTDIR%\98_bridge.js"
+call :download "%BASE%/symbols.js" "%SCRIPTDIR%\99_symbols.js"
+set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\98_bridge.js" -l "%SCRIPTDIR%\99_symbols.js""
+
+echo.
+echo  %ESC%[93mPress any key to attach to game...%ESC%[0m
+pause >nul
+
+echo  %ESC%[96mInjecting scripts...%ESC%[0m
+frida -n "animalcompany.exe" %SCRIPTS% --no-pause
+
+echo.
+echo  %ESC%[93mCleaning up...%ESC%[0m
+rmdir /s /q "%SCRIPTDIR%" >nul 2>&1
+exit /b
+
+:download
+powershell -NoProfile -ExecutionPolicy Bypass -Command "try { $r = Invoke-WebRequest -Uri '%~1' -UseBasicParsing -TimeoutSec 15; [IO.File]::WriteAllText('%~2', $r.Content) } catch { Write-Host '  [!] Failed: %~nx1' }"
+if exist "%~2" (
+    echo  %ESC%[92m[+] Downloaded: %~nx2%ESC%[0m
+) else (
+    echo  %ESC%[91m[!] Failed: %~nx2%ESC%[0m
+)
+exit /b
