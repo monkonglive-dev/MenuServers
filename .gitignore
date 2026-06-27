@@ -1,0 +1,11 @@
+MonksMenu.js
+discordrpc.js
+m4quest.js
+pcmode.js
+symbols.ts
+eac.ts
+frida-il2cpp-bridge.js
+Bypassed/
+*.ts
+!StartBoot.bat
+!MonksMenuLauncher.py
