@@ -31,9 +31,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
  "Write-Host ('  {0}[90m#{0}[0m  {0}[91mM{0}[93mO{0}[92mN{0}[96mK{0}[94mO{0}[95mN{0}[91mG{0}[93mS{0}[0m  {0}[92mS{0}[96mI{0}[94mD{0}[95mE{0}[91mL{0}[93mO{0}[92mA{0}[96mD{0}[94mE{0}[95mR{0}[0m  {0}[90m#{0}[0m' -f $r); " ^
  "Write-Host ('  {0}[90m+=========================================+{0}[0m' -f $r); " ^
  "Write-Host ('  {0}[90m#{0}[0m                                         {0}[90m#{0}[0m' -f $r); " ^
- "$opts = @('1. EAC Defuser','2. M4Quest (with EAC)'); " ^
- "$colors = @('96','92'); " ^
- "for ($i=0; $i -lt 2; $i++) { " ^
+ "$opts = @('1. EAC Defuser','2. M4Quest (with EAC)','3. Start Everything'); " ^
+ "$colors = @('96','92','93'); " ^
+ "for ($i=0; $i -lt 3; $i++) { " ^
  "  $c = $colors[$i]; " ^
  "  if (($i+1) -eq $s) { " ^
  "    Write-Host ('  {0}[90m#{0}[0m  {0}[97m^>{0}[0m {0}[{1}m{2}{0}[90m#{0}[0m' -f $r,$c,$opts[$i].PadRight(38)) " ^
@@ -52,12 +52,12 @@ exit /b 0
 for /f "delims=" %%A in ('powershell -NoProfile -Command "$k = $host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown'); Write-Output $k.VirtualKeyCode"') do set "key=%%A"
 if "!key!"=="38" (
     set /a selected-=1
-    if !selected! lss 1 set "selected=2"
+    if !selected! lss 1 set "selected=3"
     goto menu
 )
 if "!key!"=="40" (
     set /a selected+=1
-    if !selected! gtr 2 set "selected=1"
+    if !selected! gtr 3 set "selected=1"
     goto menu
 )
 if "!key!"=="13" goto selected_!selected!
@@ -76,6 +76,14 @@ cls
 echo.
 echo  %ESC%[93mFetching scripts from server...%ESC%[0m
 call :runInject quest
+pause >nul
+goto menu
+
+:selected_3
+cls
+echo.
+echo  %ESC%[93mFetching scripts from server...%ESC%[0m
+call :runInject all
 pause >nul
 goto menu
 
@@ -99,6 +107,7 @@ call :download "%BASE%/Bypassed/eac.js?v=%CB%" "%SCRIPTDIR%\03_eac.js"
 
 if "%MODE%"=="eac" goto :load_eac
 if "%MODE%"=="quest" goto :load_quest
+if "%MODE%"=="all" goto :load_all
 
 :load_eac
 call :download "%BASE%/Bypassed/stuff.js?v=%CB%" "%SCRIPTDIR%\04_stuff.js"
@@ -107,6 +116,13 @@ goto :do_inject
 :load_quest
 call :download "%BASE%/Bypassed/stuff.js?v=%CB%" "%SCRIPTDIR%\04_stuff.js"
 call :download "%BASE%/m4quest.js?v=%CB%" "%SCRIPTDIR%\05_quest.js"
+goto :do_inject
+
+:load_all
+call :download "%BASE%/Bypassed/stuff.js?v=%CB%" "%SCRIPTDIR%\04_stuff.js"
+call :download "%BASE%/MonksMenu.js?v=%CB%" "%SCRIPTDIR%\05_menu.js"
+call :download "%BASE%/m4quest.js?v=%CB%" "%SCRIPTDIR%\06_quest.js"
+call :download "%BASE%/discordrpc.js?v=%CB%" "%SCRIPTDIR%\07_rpc.js"
 goto :do_inject
 
 :do_inject
