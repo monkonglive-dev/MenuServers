@@ -101,62 +101,55 @@ if exist "%SCRIPTDIR%" rmdir /s /q "%SCRIPTDIR%"
 mkdir "%SCRIPTDIR%" >nul 2>&1
 
 set "BASE=https://raw.githubusercontent.com/monkonglive-dev/MenuServers/main"
-set "SCRIPTS="
+set "MODE=%~1"
 
 echo  %ESC%[96mDownloading scripts...%ESC%[0m
 
-REM Bridge FIRST - defines Il2Cpp used by all other scripts
+REM Bridge FIRST
 call :download "%BASE%/frida-il2cpp-bridge.js" "%SCRIPTDIR%\01_bridge.js"
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\01_bridge.js""
-
-REM Symbols second - defines offsets used by other scripts
+REM Symbols second
 call :download "%BASE%/symbols.js" "%SCRIPTDIR%\02_symbols.js"
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\02_symbols.js""
-
 REM EAC bypass third
 call :download "%BASE%/Bypassed/eac.js" "%SCRIPTDIR%\03_eac.js"
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\03_eac.js""
 
-if "%1"=="eac" goto :done
-if "%1"=="pcmode" goto :extra_pcmode
-if "%1"=="quest" goto :extra_quest
+if "%MODE%"=="eac" goto :load_eac
+if "%MODE%"=="pcmode" goto :load_pcmode
+if "%MODE%"=="quest" goto :load_quest
 
 REM all mode
 call :download "%BASE%/Bypassed/stuff.js" "%SCRIPTDIR%\04_stuff.js"
 call :download "%BASE%/MonksMenu.js" "%SCRIPTDIR%\05_menu.js"
 call :download "%BASE%/m4quest.js" "%SCRIPTDIR%\06_quest.js"
 call :download "%BASE%/discordrpc.js" "%SCRIPTDIR%\07_rpc.js"
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\04_stuff.js""
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\05_menu.js""
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\06_quest.js""
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\07_rpc.js""
-goto :done
+goto :do_inject
 
-:extra_eac
+:load_eac
 call :download "%BASE%/Bypassed/stuff.js" "%SCRIPTDIR%\04_stuff.js"
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\04_stuff.js""
-goto :done
+goto :do_inject
 
-:extra_pcmode
+:load_pcmode
 call :download "%BASE%/Bypassed/stuff.js" "%SCRIPTDIR%\04_stuff.js"
 call :download "%BASE%/pcmode.js" "%SCRIPTDIR%\05_pcmode.js"
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\04_stuff.js""
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\05_pcmode.js""
-goto :done
+goto :do_inject
 
-:extra_quest
+:load_quest
 call :download "%BASE%/m4quest.js" "%SCRIPTDIR%\04_quest.js"
-set "SCRIPTS=%SCRIPTS% -l "%SCRIPTDIR%\04_quest.js""
-goto :done
+goto :do_inject
 
-:done
-
+:do_inject
 echo.
 echo  %ESC%[93mPress any key to attach to game...%ESC%[0m
 pause >nul
 
 echo  %ESC%[96mInjecting scripts...%ESC%[0m
-frida -n "animalcompany.exe" --runtime=v8 %SCRIPTS%
+
+REM Build frida command with all .js files in directory
+set "FRIDA_ARGS="
+for %%f in ("%SCRIPTDIR%\*.js") do (
+    set "FRIDA_ARGS=!FRIDA_ARGS! -l "%%f""
+)
+
+frida -n "animalcompany.exe" --runtime=v8 !FRIDA_ARGS!
 
 echo.
 echo  %ESC%[93mCleaning up...%ESC%[0m
