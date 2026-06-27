@@ -568,14 +568,14 @@ var mobGunDelay2 = 0;
 var mobSpawnButtonLatched = false;
 var mobSpawnGunTriggerLatched = false;
 var flySpeed = 20;
-var bgColor: [number, number, number, number]            = [0.325, 0.067, 0.784, 0.92];
-var textColor: [number, number, number, number]          = [0.98, 0.92, 1.0, 1.0];
-var buttonColor: [number, number, number, number]        = [0.541, 0.282, 1, 0.96];
-var buttonPressedColor: [number, number, number, number] = [0.78, 0.34, 1.0, 1.0];
+var bgColor = [0.325, 0.067, 0.784, 0.92];
+var textColor = [0.98, 0.92, 1.0, 1.0];
+var buttonColor = [0.541, 0.282, 1, 0.96];
+var buttonPressedColor = [0.78, 0.34, 1.0, 1.0];
 var menuAnimTime = 0;
 var themeMode = 9; 
 var rainbowStep = 0; 
-var rainbowPresets: [number,number,number][] = [
+var rainbowPresets = [
     [1.0, 0.0, 0.0], 
     [1.0, 0.5, 0.0], 
     [1.0, 1.0, 0.0], 
@@ -610,8 +610,8 @@ var rightStickX = 0.0;
 var rightStickY = 0.0;
 var prevLeftGrab = false;
 var prevRightGrab = false;
-var joystickFlyVelocity: [number, number, number] = [0, 0, 0];
-var fistFlyVelocity: [number, number, number] = [0, 0, 0];
+var joystickFlyVelocity = [0, 0, 0];
+var fistFlyVelocity = [0, 0, 0];
 var InfAmmo = false;
 var noRecoil = false;
 var noShotgunCooldown = false;
@@ -1603,7 +1603,7 @@ Il2Cpp.perform(() => {
         textSpawnedObjects = remaining;
         sendNotification("Cleared Hell Ore text: " + cleared, false);
     }
-    function trackPersistentMob(mobEntry, pos, rot, spawned) {
+    function trackPersistentMob(mobEntry: { name; id }, pos, rot, spawned) {
         try {
             persistentMobEntries.push({
                 mobEntry,
@@ -1674,7 +1674,7 @@ function acResolveMobID(mobId) {
     }
     var rawName = String(mobId || "").replace(/^mob_prefab\//, "");
     var trimmed = rawName.replace(/Controller$/, "").replace(/_?Controller$/, "");
-    var candidates = [rawName, acMobAliases[rawName], trimmed, acMobAliases[trimmed]].filter(Boolean) [];
+    var candidates = [rawName, acMobAliases[rawName], trimmed, acMobAliases[trimmed]].filter(Boolean);
     for (var candidate of candidates) {
         var enumVal = acGetMobEnumField(candidate);
         if (enumVal !== null) return enumVal;
@@ -1722,7 +1722,7 @@ function acGetNetworkObjectSpawnDelegateRef() {
     }
     return acNetworkObjectSpawnDelegateRef;
 }
-function spawnMobAtPos(mobEntry, pos, rot) {
+function spawnMobAtPos(mobEntry: { name; id }, pos, rot) {
     var trackSpawnedMob = (spawned) => {
         try {
             if (spawned && !spawned.isNull?.()) {
@@ -2112,7 +2112,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
             try { getTransform(targetObj).method("set_localScale").invoke([worldScale, worldScale, worldScale]); } catch(_) {}
         }
     }
-    (surfaceObject, color: [number, number, number, number], thickness = 0.045) {
+    function addSurfaceOutline(surfaceObject, color: [number, number, number, number], thickness = 0.045) {
         if (!menuOutlineEnabled) return;
         return;
         var parent = getTransform(surfaceObject);
@@ -2130,7 +2130,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
             } catch(_) {}
         }
     }
-    (surfaceObject, color: [number, number, number, number], radius = 0.022) {
+    function addRoundedCorners(surfaceObject, color: [number, number, number, number], radius = 0.022) {
         if (!roundCornersEnabled) return;
         return;
         var parent = getTransform(surfaceObject);
@@ -2170,7 +2170,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
         currentNotification = text;
         if (requiresReload && !isOld) reloadMenu();
     }
-(pos = zeroVector, rot = identityQuaternion, scale = oneVector, primitiveType = 3, colorArr: [number, number, number, number] = [1, 1, 1, 1], parent = null, enableCollider = false) {
+function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVector, primitiveType = 3, colorArr: [number, number, number, number] = [1, 1, 1, 1], parent = null, enableCollider = false) {
     var obj = GameObject.method("CreatePrimitive").invoke(primitiveType);
     var renderer = getComponent(obj, Renderer);
     if (colorArr[3] == 0) {
@@ -2196,7 +2196,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
     transform.method("set_localScale").invoke(scale);
     return obj;
 }
-    (obj, color: [number, number, number, number]) {
+    function setRendererColorSafe(obj, color: [number, number, number, number]) {
         try {
             if (!obj || obj.isNull?.()) return;
             var renderer = getComponent(obj, Renderer);
@@ -2205,7 +2205,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
             if (material && !material.isNull?.()) material.method("set_color").invoke(color);
         } catch(_) {}
     }
-    (obj, color: [number, number, number, number]) {
+    function setTextColorSafe(obj, color: [number, number, number, number]) {
         try {
             if (!obj || obj.isNull?.()) return;
             try {
@@ -2239,10 +2239,10 @@ function spawnMobAtPos(mobEntry, pos, rot) {
                         var buttonData = getIndex(name.slice(1));
                         if (themeMode === 10) {
                             var isSideButton = name === "@Disconnect" || name === "@GlobalReturn" || name === "@PreviousPage" || name === "@NextPage";
-                            var sideColor: [number, number, number, number] = buttonData?.enabled
+                            var sideColor = buttonData?.enabled
                                 ? [0.22, 0.22, 0.22, 1.0]
                                 : [0.01, 0.01, 0.01, 0.96];
-                            var pageColor: [number, number, number, number] = buttonData?.enabled
+                            var pageColor = buttonData?.enabled
                                 ? buttonPressedColor
                                 : buttonColor;
                             setRendererColorSafe(go, isSideButton ? sideColor : pageColor);
@@ -2262,20 +2262,20 @@ function spawnMobAtPos(mobEntry, pos, rot) {
     function smoothNumber(current, target, amount = 0.18) {
         return current + ((target - current) * amount);
     }
-    (state: [number, number, number], target: [number, number, number], amount = 0.18) {
+    function smoothVec3(state: [number, number, number], target: [number, number, number], amount = 0.18) {
         state[0] = smoothNumber(state[0], target[0], amount);
         state[1] = smoothNumber(state[1], target[1], amount);
         state[2] = smoothNumber(state[2], target[2], amount);
         return state;
     }
-    function readVec3Components(vec): [number, number, number] {
+    function readVec3Components(vec) {
         return [
             (vec.field("x").value ) || 0,
             (vec.field("y").value ) || 0,
             (vec.field("z").value ) || 0
         ];
     }
-    function normalizeXZ(x, z): [number, number] {
+    function normalizeXZ(x, z) {
         var mag = Math.sqrt((x * x) + (z * z));
         if (mag < 0.0001) return [0, 1];
         return [x / mag, z / mag];
@@ -2513,7 +2513,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
             var handTf = getPlayerLaunchTransform(player, handIndex, held);
             if (!handTf || handTf.isNull?.()) return false;
             var straightForward = getPlayerStraightForward(player);
-            var up: [number, number, number] = [0, 1, 0];
+            var up = [0, 1, 0];
             var basePos = handTf.method("get_position").invoke();
             var rot = getLookRotationFromForward(straightForward);
             var spawnedAny = false;
@@ -2681,7 +2681,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
             }
         } catch(_) {}
     }
-    (pos, scale: [number, number, number] = [0.35, 0.03, 0.35], color: [number, number, number, number] = [1.0, 0.55, 0.08, 0.9]) {
+    function createSolidPlatform(pos, scale: [number, number, number] = [0.35, 0.03, 0.35], color: [number, number, number, number] = [1.0, 0.55, 0.08, 0.9]) {
         var obj = createObject(pos, identityQuaternion, scale, 3, color, null, true);
         try {
             var col = getComponent(obj, Collider);
@@ -2692,7 +2692,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
         } catch(_) {}
         return obj;
     }
-    (textRootObject, surfaceObject, text = "", color: [number, number, number, number] = [1, 1, 1, 1], pos = zeroVector, size = oneVector) {
+    function renderMenuText(textRootObject, surfaceObject, text = "", color: [number, number, number, number] = [1, 1, 1, 1], pos = zeroVector, size = oneVector) {
         if (!TextMesh && !TextMeshPro3D) {
             if (!menuFontWarned) {
                 menuFontWarned = true;
@@ -3008,17 +3008,17 @@ function spawnMobAtPos(mobEntry, pos, rot) {
             GunLine.method("SetPosition").invoke(0, StartPosition);
             var dirVec = readVec3Components(Direction);
             var dirMag = Math.sqrt((dirVec[0] * dirVec[0]) + (dirVec[1] * dirVec[1]) + (dirVec[2] * dirVec[2])) || 1;
-            var dirNorm: [number, number, number] = [dirVec[0] / dirMag, dirVec[1] / dirMag, dirVec[2] / dirMag];
-            var upBasis: [number, number, number] = [0, 1, 0];
+            var dirNorm = [dirVec[0] / dirMag, dirVec[1] / dirMag, dirVec[2] / dirMag];
+            var upBasis = [0, 1, 0];
             if (Math.abs(dirNorm[1]) > 0.92) upBasis = [1, 0, 0];
-            var side: [number, number, number] = [
+            var side = [
                 (upBasis[1] * dirNorm[2]) - (upBasis[2] * dirNorm[1]),
                 (upBasis[2] * dirNorm[0]) - (upBasis[0] * dirNorm[2]),
                 (upBasis[0] * dirNorm[1]) - (upBasis[1] * dirNorm[0])
             ];
             var sideMag = Math.sqrt((side[0] * side[0]) + (side[1] * side[1]) + (side[2] * side[2])) || 1;
             side = [side[0] / sideMag, side[1] / sideMag, side[2] / sideMag];
-            var swirlUp: [number, number, number] = [
+            var swirlUp = [
                 (dirNorm[1] * side[2]) - (dirNorm[2] * side[1]),
                 (dirNorm[2] * side[0]) - (dirNorm[0] * side[2]),
                 (dirNorm[0] * side[1]) - (dirNorm[1] * side[0])
@@ -3341,7 +3341,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
             return null;
         }
     }
-    function getPlayerStraightForward(player): [number, number, number] {
+    function getPlayerStraightForward(player) {
         try {
             var tf = getPlayerHeadTransform(player) ?? getTransform(player);
             var raw = readVec3Components(tf.method("get_forward").invoke());
@@ -3352,7 +3352,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
         } catch(_) {}
         return [0, 0, 1];
     }
-    (forward: [number, number, number]) {
+    function getLookRotationFromForward(forward: [number, number, number]) {
         try { return Quaternion.method("LookRotation", 2).invoke(forward, [0, 1, 0]); } catch(_) {}
         try { return Quaternion.method("LookRotation", 1).invoke(forward); } catch(_) {}
         return identityQuaternion;
@@ -3534,7 +3534,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
     function getPlayerOverlayKey(player) {
         try { return normalizeSceneObjectHandle(player) || getPlayerName(player) || String(player); } catch(_) { return String(player); }
     }
-    (material, color: [number, number, number, number]) {
+    function configureOverlayMaterial(material, color: [number, number, number, number]) {
         try {
             if (!material || material.isNull?.()) return;
             try { material.method("set_shader").invoke(TextShader); } catch(_) { try { material.method("set_shader").invoke(UberShader); } catch(_) {} }
@@ -3545,7 +3545,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
             try { material.method("set_renderQueue").invoke(5000); } catch(_) {}
         } catch(_) {}
     }
-    (renderer, color: [number, number, number, number]) {
+    function configureOverlayRenderer(renderer, color: [number, number, number, number]) {
         try {
             if (!renderer || renderer.isNull?.()) return;
             try { renderer.method("set_sortingOrder").invoke(32767); } catch(_) {}
@@ -3771,16 +3771,16 @@ function spawnMobAtPos(mobEntry, pos, rot) {
                 ];
                 var height = Math.max(0.9, ((headPos.field("y").value ) - (bodyPos.field("y").value )) + 0.55);
                 var width = Math.max(0.24, height * 0.32);
-                var rightVec: [number, number, number] = [camRight[0] * width, camRight[1] * width, camRight[2] * width];
-                var upVec: [number, number, number] = [camUp[0] * height * 0.5, camUp[1] * height * 0.5, camUp[2] * height * 0.5];
+                var rightVec = [camRight[0] * width, camRight[1] * width, camRight[2] * width];
+                var upVec = [camUp[0] * height * 0.5, camUp[1] * height * 0.5, camUp[2] * height * 0.5];
                 var p0 = [center[0] - rightVec[0] - upVec[0], center[1] - rightVec[1] - upVec[1], center[2] - rightVec[2] - upVec[2]];
                 var p1 = [center[0] + rightVec[0] - upVec[0], center[1] + rightVec[1] - upVec[1], center[2] + rightVec[2] - upVec[2]];
                 var p2 = [center[0] + rightVec[0] + upVec[0], center[1] + rightVec[1] + upVec[1], center[2] + rightVec[2] + upVec[2]];
                 var p3 = [center[0] - rightVec[0] + upVec[0], center[1] - rightVec[1] + upVec[1], center[2] - rightVec[2] + upVec[2]];
                 var box = entry.box;
                 var ray = entry.ray;
-                var espColor: [number, number, number, number] = [0.18, 0.62, 1.0, 0.95];
-                var rayColor: [number, number, number, number] = [1.0, 0.58, 0.1, 0.92];
+                var espColor = [0.18, 0.62, 1.0, 0.95];
+                var rayColor = [1.0, 0.58, 0.1, 0.92];
                 try {
                     box.method("set_useWorldSpace").invoke(true);
                     box.method("set_positionCount").invoke(5);
@@ -4370,7 +4370,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
             return false;
         }
     }
-    function getSelectedVfxEntry(): [string, number] {
+    function getSelectedVfxEntry() {
         if (selectedVfxIndex < 0 || selectedVfxIndex >= vfxTypeEntries.length) selectedVfxIndex = 0;
         return vfxTypeEntries[selectedVfxIndex];
     }
@@ -4574,7 +4574,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
     function spawnLocalVfxFallback(pos) {
         try {
             var base = readVec3Components(pos);
-            var colors: [number, number, number, number][] = [
+            var colors = [
                 [1.0, 0.55, 0.08, 0.92],
                 [1.0, 0.82, 0.18, 0.92],
                 [0.96, 0.96, 0.96, 0.88]
@@ -5444,17 +5444,17 @@ function spawnMobAtPos(mobEntry, pos, rot) {
             lines.push("");
             lines.push("Assemblies / Classes / Methods:");
             try {
-                var assemblies = (Il2Cpp.domain.assemblies ?? []) [];
+                var assemblies = (Il2Cpp.domain.assemblies ?? []);
                 for (var asm of assemblies) {
                     try {
                         var img = asm.image;
                         var imgName = String(img?.name ?? asm?.name ?? "?");
                         lines.push("[Assembly] " + imgName);
-                        for (var klass of ((img?.classes ?? []) [])) {
+                        for (var klass of (img?.classes ?? [])) {
                             try {
                                 var className = String(klass?.type?.name ?? klass?.name ?? "?");
                                 lines.push("  [Class] " + className);
-                                for (var method of ((klass?.methods ?? []) [])) {
+                                for (var method of (klass?.methods ?? [])) {
                                     try {
                                         var paramCount = Number(method?.parameterCount ?? method?.parameters?.length ?? 0);
                                         lines.push("    - " + String(method?.name ?? "?") + "(" + paramCount + ")");
@@ -5837,7 +5837,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
             try {
                 var player = NetPlayer.method("get_localPlayer").invoke();
                 if (!player || player.handle.isNull()) return;
-                var desired: [number, number, number] = [0, 0, 0];
+                var desired = [0, 0, 0];
                 if (rightFist) {
                     var rightForward = readVec3Components(rightHandTransform.method("get_forward").invoke());
                     desired[0] += rightForward[0];
@@ -5877,7 +5877,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
             try {
                 var player = NetPlayer.method("get_localPlayer").invoke();
                 if (!player || player.handle.isNull()) return;
-                var desired: [number, number, number] = [0, 0, 0];
+                var desired = [0, 0, 0];
                 if (rightFist) {
                     var rightForward = readVec3Components(rightHandTransform.method("get_forward").invoke());
                     desired[0] += rightForward[0];
@@ -5917,7 +5917,7 @@ function spawnMobAtPos(mobEntry, pos, rot) {
             try {
                 var player = NetPlayer.method("get_localPlayer").invoke();
                 if (!player || player.handle.isNull()) return;
-                var desired: [number, number, number] = [0, 0, 0];
+                var desired = [0, 0, 0];
                 if (rightFist) {
                     var rightForward = readVec3Components(rightHandTransform.method("get_forward").invoke());
                     desired[0] += rightForward[0];
@@ -16485,9 +16485,9 @@ new ButtonInfo({
         var rightDevice = InputDevices.method("GetDeviceAtXRNode", 1).invoke(5);
         var outBool = Il2Cpp.alloc(1);
         var outVec2 = Il2Cpp.alloc(8);
-        function readAxis2D(device): [number, number] {
+        function readAxis2D(device) {
             try {
-                var readUsage = (usage): [number, number] => {
+                var readUsage = (usage) => {
                     try {
                         outVec2.writeFloat(0);
                         outVec2.add(4).writeFloat(0);
@@ -16501,11 +16501,11 @@ new ButtonInfo({
                     } catch(_) {}
                     return [0, 0];
                 };
-                var candidates: [number, number][] = [];
+                var candidates = [];
                 try { candidates.push(readUsage(CommonUsages.field("primary2DAxis").value)); } catch(_) {}
                 try { candidates.push(readUsage(CommonUsages.field("secondary2DAxis").value)); } catch(_) {}
                 try { candidates.push(readUsage(CommonUsages.field("thumbstick").value)); } catch(_) {}
-                var best: [number, number] = [0, 0];
+                var best = [0, 0];
                 var bestMag = 0;
                 for (var candidate of candidates) {
                     var mag = Math.abs(candidate[0]) + Math.abs(candidate[1]);
