@@ -1025,7 +1025,7 @@ Il2Cpp.perform(() => {
                 }
             } catch(_) {}
         }
-        return tmpDefaultFontAsset && !tmpDefaultFontAsset.isNull() ? tmpDefaultFontAsset ;
+        return tmpDefaultFontAsset && !tmpDefaultFontAsset.isNull() ? tmpDefaultFontAsset : null;
     }
     var NullMethod = {
         invoke: () => NullObject,
@@ -13534,7 +13534,7 @@ new ButtonInfo({
                             } catch(_) { segments.unshift("?"); }
                             try {
                                 var p = tf.method("get_parent").invoke();
-                                tf = (p && !p.isNull()) ? p ;
+                                tf = (p && !p.isNull()) ? p : null;
                             } catch(_) { tf = null; }
                         }
                         var path = "/" + segments.join("/");
