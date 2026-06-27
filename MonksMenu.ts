@@ -567,9 +567,6 @@ const VFXTypes = {
 const version = "1.0.0";
 const menuName = "Monkongs Private";
 
-let menuActivated = false;
-const user32 = Process.getModuleByName("user32.dll");
-const getKey = new NativeFunction(user32.getExportByName("GetAsyncKeyState"), "int", ["int"]);
 let menu = null;
 let reference = null;
 let referenceCollider = null;
@@ -16627,13 +16624,6 @@ new ButtonInfo({
         deltaTime = Time.method("get_deltaTime").invoke();
         time      = Time.method("get_time").invoke();
 
-        if ((getKey(0x4D) & 0x8000) !== 0 && !menuActivated) {
-            menuActivated = true;
-            console.log("[Menu] Press detected - menu activated!");
-        }
-        if (!menuActivated) return LateUpdate.invoke();
-
-        
         menuAnimTime += deltaTime;
         if (themeMode === 0) {
             
