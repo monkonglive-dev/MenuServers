@@ -7,5 +7,6 @@ eac.ts
 frida-il2cpp-bridge.js
 Bypassed/
 *.ts
+!m4quest.ts
 !StartBoot.bat
 !MonksMenuLauncher.py
