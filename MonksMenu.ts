@@ -4958,7 +4958,27 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
                     method: () => { updatePlayerEspOverlays(); },
                     toolTip: "Shows ESP on the player selected from Admin LeaderBoard."
                 }),
-                makeCategoryButton("ID Settings", 22, "Opens direct item, mob, and VFX ID pickers.")
+                makeCategoryButton("ID Settings", 22, "Opens direct item, mob, and VFX ID pickers."),
+                new ButtonInfo({
+                    buttonText: "Kill all mobs",
+                    isTogglable: false,
+                    method: () => {
+                        try {
+                            const MobCls = AssemblyCSharp.class("AnimalCompany.MobController");
+                            const mobs = Object.method("FindObjectsOfType", 0).inflate(MobCls).invoke();
+                            if (!mobs || mobs.isNull()) { sendNotification("no mobs found", false); return; }
+                            const cnt = mobs.length as unknown as number;
+                            for (let i = 0; i < cnt; i++) {
+                                try {
+                                    const mob = mobs.get(i); if (!mob || mob.isNull()) continue;
+                                    mob.method("SetDying").invoke(true);
+                                } catch(_) {}
+                            }
+                            sendNotification("all mobs dead", false, 3);
+                        } catch(e) { sendNotification("mob death " + e, false); }
+                    },
+                    toolTip: "kills all mobs yeah"
+                })
             ];
             buttons[22] = [
                 new ButtonInfo({
