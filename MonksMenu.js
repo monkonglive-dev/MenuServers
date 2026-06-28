@@ -8364,6 +8364,32 @@ Il2Cpp.perform(async () => {
                 isTogglable: true,
                 toolTip: "Keeps tracked spawned mobs active and respawns them if they drop out."
             }),
+            new ButtonInfo({
+                buttonText: "VFX Spawn Gun",
+                method: () => {
+                    if (!rightGrab)
+                        return;
+                    const gunData = renderGun();
+                    const ray = gunData.ray;
+                    if (!rightTrigger)
+                        return;
+                    if (time <= lagGunDelay)
+                        return;
+                    lagGunDelay = time + 0.15;
+                    try {
+                        const hitPoint = (ray && !ray.isNull?.())
+                            ? ray.method("get_point").invoke()
+                            : getTransform(gunData.gunPointer).method("get_position").invoke();
+                        try {
+                            playSelectedVfxAt(hitPoint);
+                        }
+                        catch (_) { }
+                    }
+                    catch (e) { }
+                },
+                isTogglable: true,
+                toolTip: "Spawns the selected VFX at your gun pointer. Use VFX IDs settings to pick which one."
+            }),
         ],
         [
             new ButtonInfo({
