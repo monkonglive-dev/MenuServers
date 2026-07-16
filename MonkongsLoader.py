@@ -54,16 +54,16 @@ MODES = {
     },
 }
 
-BG      = "#0d1117"
-PANEL   = "#161b22"
-PANEL2  = "#1c2333"
-BORDER  = "#30363d"
-ACCENT  = "#58a6ff"
-RED     = "#f85149"
-GREEN   = "#3fb950"
-YELLOW  = "#d29922"
-TXT     = "#e6edf3"
-DIM     = "#8b949e"
+BG      = "#1a0508"
+PANEL   = "#2a0a0e"
+PANEL2  = "#3a0f14"
+BORDER  = "#5a1a20"
+ACCENT  = "#ff4444"
+RED     = "#ff6666"
+GREEN   = "#ff4444"
+YELLOW  = "#ff8800"
+TXT     = "#ffcccc"
+DIM     = "#aa5555"
 BRIGHT  = "#ffffff"
 
 
@@ -89,8 +89,8 @@ class LoaderApp:
             x = random.randint(20, 940)
             y = random.randint(20, 620)
             sz = random.randint(16, 32)
-            gray = random.randint(25, 65)
-            c = f"#{gray:02x}{gray:02x}{gray+15:02x}"
+            gray = random.randint(30, 70)
+            c = f"#{gray:02x}{gray//4:02x}{gray//3:02x}"
             item = self.canvas.create_text(x, y, text=em, font=("Segoe UI Emoji", sz), fill=c)
             dx = random.uniform(-0.4, 0.4)
             dy = random.uniform(-0.3, 0.3)
@@ -116,21 +116,21 @@ class LoaderApp:
         outer.place(x=0, y=0, relwidth=1, relheight=1)
         outer.lift()
 
-        title = tk.Frame(outer, bg="#010409", height=38)
+        title = tk.Frame(outer, bg="#120204", height=38)
         title.pack(fill="x")
         title.pack_propagate(False)
-        tk.Label(title, text="\u2605 MONKONGS // LOADER v1.0.0", bg="#010409", fg=ACCENT,
+        tk.Label(title, text="\u2605 MONKONGS // LOADER v1.0.0", bg="#120204", fg=ACCENT,
                  font=("Consolas", 12, "bold"), padx=12).pack(side="left")
-        self.tgt_lbl = tk.Label(title, text="LOCAL RUNTIME", bg="#010409", fg=DIM,
+        self.tgt_lbl = tk.Label(title, text="LOCAL RUNTIME", bg="#120204", fg=DIM,
                                  font=("Consolas", 9))
         self.tgt_lbl.pack(side="right", padx=12)
 
         hdr = tk.Frame(outer, bg=PANEL, height=40)
         hdr.pack(fill="x", padx=6, pady=(4, 2))
         hdr.pack_propagate(False)
-        self.rdot = tk.Label(hdr, text="\u25cf", bg=PANEL, fg=GREEN, font=("Consolas", 14))
+        self.rdot = tk.Label(hdr, text="\u25cf", bg=PANEL, fg=ACCENT, font=("Consolas", 14))
         self.rdot.pack(side="left", padx=(8, 4))
-        self.rtxt = tk.Label(hdr, text="READY", bg=PANEL, fg=GREEN, font=("Consolas", 11, "bold"))
+        self.rtxt = tk.Label(hdr, text="READY", bg=PANEL, fg=ACCENT, font=("Consolas", 11, "bold"))
         self.rtxt.pack(side="left")
         tk.Label(hdr, text=" All checks operational.", bg=PANEL, fg=DIM,
                  font=("Consolas", 10)).pack(side="left")
@@ -181,7 +181,7 @@ class LoaderApp:
         for dep in ["python", "frida", "frida-tools"]:
             r = tk.Frame(df, bg=PANEL)
             r.pack(fill="x", pady=1)
-            d = tk.Label(r, text="\u25cf", bg=PANEL, fg=GREEN, font=("Consolas", 8))
+            d = tk.Label(r, text="\u25cf", bg=PANEL, fg=ACCENT, font=("Consolas", 8))
             d.pack(side="left", padx=(0, 4))
             tk.Label(r, text=dep, bg=PANEL, fg=TXT, font=("Consolas", 8), anchor="w").pack(side="left")
             self.dep_dots[dep] = d
@@ -219,17 +219,17 @@ class LoaderApp:
                                      command=self.start_injection)
         self.launch_btn.pack(fill="x", padx=14, pady=(14, 6))
 
-        self.status_bar = tk.Label(right, text="Status: ready", bg=PANEL, fg=GREEN,
+        self.status_bar = tk.Label(right, text="Status: ready", bg=PANEL, fg=ACCENT,
                                     font=("Consolas", 10), anchor="w", padx=14)
         self.status_bar.pack(fill="x")
 
         tk.Label(right, text="\u2605 SYSTEM EVENTS", bg=PANEL, fg=ACCENT, font=("Consolas", 11, "bold"),
                  anchor="w", padx=14).pack(fill="x", pady=(10, 4))
 
-        lf = tk.Frame(right, bg="#0d1117", highlightbackground=BORDER, highlightthickness=1)
+        lf = tk.Frame(right, bg="#1a0508", highlightbackground=BORDER, highlightthickness=1)
         lf.pack(fill="both", expand=True, padx=14, pady=(0, 10))
-        self.log_text = tk.Text(lf, bg="#0d1117", fg=GREEN, font=("Consolas", 9),
-                                 insertbackground=GREEN, relief="flat", bd=0, wrap="word",
+        self.log_text = tk.Text(lf, bg="#1a0508", fg=ACCENT, font=("Consolas", 9),
+                                 insertbackground=ACCENT, relief="flat", bd=0, wrap="word",
                                  state="disabled", highlightthickness=0)
         sb = tk.Scrollbar(lf, command=self.log_text.yview, bg=BG, troughcolor=BG, highlightthickness=0)
         self.log_text.configure(yscrollcommand=sb.set)
@@ -252,14 +252,14 @@ class LoaderApp:
 
     def set_ready(self, ready=True, text=""):
         def _s():
-            self.rdot.config(fg=GREEN if ready else YELLOW)
-            self.rtxt.config(text="READY" if ready else (text or "BUSY"), fg=GREEN if ready else YELLOW)
+            self.rdot.config(fg=ACCENT if ready else YELLOW)
+            self.rtxt.config(text="READY" if ready else (text or "BUSY"), fg=ACCENT if ready else YELLOW)
         self.root.after(0, _s)
 
     def on_mode_select(self):
         m = self.selected_mode.get()
         if m:
-            self.launch_btn.config(text=f"START {m}", bg="#1a4080", fg=BRIGHT)
+            self.launch_btn.config(text=f"START {m}", bg="#801010", fg=BRIGHT)
             self.log(f"[{datetime.now().strftime('%H:%M:%S')}] Mode selected: {m}")
 
     def check_process(self):
@@ -284,7 +284,7 @@ class LoaderApp:
                 r = subprocess.run([sys.executable, "-m", "pip", "show", dep.replace("-","_")],
                                     capture_output=True, text=True, timeout=10)
                 ok = r.returncode == 0
-                self.dep_dots[dep].config(fg=GREEN if ok else YELLOW)
+                self.dep_dots[dep].config(fg=ACCENT if ok else YELLOW)
                 self.log(f"  [{'+'if ok else '-'}] {dep}: {'installed' if ok else 'missing'}")
             except:
                 self.dep_dots[dep].config(fg=RED)
@@ -376,7 +376,7 @@ class LoaderApp:
                     f.write(data)
                 self.log(f"  [+] Downloaded: {local}")
                 if i < len(self.file_status):
-                    self.root.after(0, lambda idx=i: self.file_status[idx].config(text="ready", fg=GREEN))
+                    self.root.after(0, lambda idx=i: self.file_status[idx].config(text="ready", fg=ACCENT))
             except Exception as e:
                 self.log(f"  [!] Failed: {local} - {e}")
 
