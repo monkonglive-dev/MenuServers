@@ -431,18 +431,39 @@ class LoaderApp:
         try:
             r = subprocess.run(["g++", "--version"], capture_output=True, text=True, timeout=5)
             if r.returncode == 0 and "mingw" in r.stdout.lower():
-                self.log(f"[+] MinGW-w64 found: {r.stdout.split(chr(10))[0]}")
+                self.log(f"[+] MinGW-w64 found in PATH: {r.stdout.split(chr(10))[0]}")
                 return True
         except:
             pass
-        try:
-            r = subprocess.run(["where", "g++"], capture_output=True, text=True, timeout=5)
-            if r.returncode == 0:
-                self.log(f"[+] g++ found at: {r.stdout.strip()}")
+        downloads = os.path.join(os.environ.get("USERPROFILE", ""), "Downloads")
+        search_dirs = [
+            downloads,
+            os.path.join(downloads, "mingw64"),
+            os.path.join(downloads, "mingw"),
+        ]
+        for d in search_dirs:
+            if not os.path.isdir(d):
+                continue
+            for item in os.listdir(d):
+                full = os.path.join(d, item)
+                if not os.path.isdir(full):
+                    continue
+                gpp = os.path.join(full, "bin", "g++.exe")
+                if os.path.exists(gpp):
+                    self.log(f"[+] MinGW-w64 found: {gpp}")
+                    mingw_bin = os.path.join(full, "bin")
+                    os.environ["PATH"] = mingw_bin + ";" + os.environ.get("PATH", "")
+                    self.mingw_path = mingw_bin
+                    return True
+            gpp = os.path.join(d, "bin", "g++.exe")
+            if os.path.exists(gpp):
+                self.log(f"[+] MinGW-w64 found: {gpp}")
+                os.environ["PATH"] = os.path.join(d, "bin") + ";" + os.environ.get("PATH", "")
+                self.mingw_path = os.path.join(d, "bin")
                 return True
-        except:
-            pass
-        self.log("[-] MinGW-w64 g++ not found in PATH")
+        self.log("[-] MinGW-w64 not found in PATH or Downloads")
+        self.log("[!] Download from: https://github.com/niXman/mingw-builds-binaries/releases")
+        self.log("[!] Extract to Downloads\\mingw64")
         return False
 
     def _compile_overlay(self):
