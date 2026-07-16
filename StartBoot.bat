@@ -149,9 +149,11 @@ if "!MODE!"=="menu" (
     echo  %ESC%[92mSuccessfully sideloaded Menu!%ESC%[0m
 ) else (
     echo  %ESC%[93mStarting Frida bypass window...%ESC%[0m
-    echo  %ESC%[96mStart Animal Company now. Frida will auto-inject when detected.%ESC%[0m
+    echo  %ESC%[96mStart Animal Company after the bypass window opens.%ESC%[0m
+    echo  %ESC%[96mFrida will auto-inject when the game is detected.%ESC%[0m
     echo.
-    start "Monkongs Bypass" cmd /k frida -n animalcompany.exe --runtime=v8 !FRIDA_ARGS!
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "$sd='%SCRIPTDIR%'; $js=Get-ChildItem -Path $sd -Filter '*.js'|Sort-Object Name; $fa=($js|ForEach-Object{'-l \"'+$_.FullName+'\"'})-join' '; $bat='@echo off'+[char]10+'title Monkongs Bypass'+[char]10+'color 0A'+[char]10+':retry'+[char]10+'echo.'+[char]10+'echo  Waiting for Animal Company...'+[char]10+'echo.'+[char]10+('frida -n animalcompany.exe --runtime=v8 '+$fa)+[char]10+'if %errorlevel% neq 0 ('+[char]10+'    echo  Game not found, retrying in 3 seconds...'+[char]10+'    timeout /t 3 /nobreak >nul'+[char]10+'    goto retry'+[char]10+')'+[char]10+'echo.'+[char]10+'echo  Bypass injected! Press any key to close.'+[char]10+'pause >nul'; [IO.File]::WriteAllText([IO.Path]::Combine($sd,'run_bypass.bat'),$bat)"
+    start "" "%SCRIPTDIR%\run_bypass.bat"
     echo  %ESC%[92mFrida bypass window opened!%ESC%[0m
 )
 

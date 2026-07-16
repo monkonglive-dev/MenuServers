@@ -461,23 +461,26 @@ class LoaderApp:
         if not js:
             self.log("  [!] No JS files!")
             return
-        frida_args = []
-        for f in js:
-            frida_args.extend(["-l", f])
+        frida_args = " ".join(['-l "' + f + '"' for f in js])
         bat_path = os.path.join(SCRIPT_DIR, "run_bypass.bat")
+        bat_content = f"""@echo off
+title Monkongs Bypass
+color 0A
+:retry
+echo.
+echo  Waiting for Animal Company...
+echo.
+frida -n animalcompany.exe --runtime=v8 {frida_args}
+if %errorlevel% neq 0 (
+    echo  Game not found, retrying in 3 seconds...
+    timeout /t 3 /nobreak >nul
+    goto retry
+)
+echo.
+echo  Bypass injected! Press any key to close.
+pause >nul"""
         with open(bat_path, "w", encoding="utf-8") as bf:
-            bf.write("@echo off\n")
-            bf.write("title Monkongs Bypass\n")
-            bf.write("color 0A\n")
-            bf.write("echo.\n")
-            bf.write("echo  Starting frida bypass...\n")
-            bf.write("echo  Waiting for Animal Company...\n")
-            bf.write("echo.\n")
-            frida_cmd = " ".join(["frida", "-n", TARGET_PROCESS, "--runtime=v8"] + frida_args)
-            bf.write(f"{frida_cmd}\n")
-            bf.write("echo.\n")
-            bf.write("echo  Bypass finished. Press any key to close.\n")
-            bf.write("pause >nul\n")
+            bf.write(bat_content)
         subprocess.Popen([bat_path], creationflags=subprocess.CREATE_NEW_CONSOLE)
         self.log(f"  [+] Frida bypass window launched with {len(js)} scripts")
 
