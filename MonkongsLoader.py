@@ -472,8 +472,66 @@ class LoaderApp:
             if depth > 3:
                 dirs.clear()
         self.log("[-] MinGW-w64 not found")
-        self.log("[!] Click 'SET MinGW PATH' or download from:")
-        self.log("[!] https://github.com/niXman/mingw-builds-binaries/releases")
+        self.log("[*] Auto-installing MinGW-w64 v11.2.0...")
+        return self._auto_install_mingw()
+
+    def _auto_install_mingw(self):
+        try:
+            import py7zr
+        except ImportError:
+            self.log("[*] Installing py7zr for extraction...")
+            try:
+                subprocess.run([sys.executable, "-m", "pip", "install", "py7zr"],
+                               capture_output=True, timeout=60)
+                import py7zr
+            except Exception as e:
+                self.log(f"[!] Failed to install py7zr: {e}")
+                self.log("[!] Install manually: pip install py7zr")
+                return False
+        downloads = os.path.join(os.environ.get("USERPROFILE", ""), "Downloads")
+        mingw_dir = os.path.join(downloads, "mingw64")
+        exe = os.path.join(mingw_dir, "bin", "g++.exe")
+        if os.path.exists(exe):
+            self.log(f"[+] MinGW-w64 already installed: {mingw_dir}")
+            self.mingw_path = os.path.join(mingw_dir, "bin")
+            os.environ["PATH"] = self.mingw_path + ";" + os.environ.get("PATH", "")
+            return True
+        url = "https://github.com/niXman/mingw-builds-binaries/releases/download/11.2.0-rt_v9-rev1/x86_64-11.2.0-release-posix-seh-rt_v9-rev1.7z"
+        archive = os.path.join(downloads, "mingw64.7z")
+        self.log("[*] Downloading MinGW-w64 v11.2.0 (~60MB)...")
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            data = urllib.request.urlopen(req, timeout=300).read()
+            with open(archive, "wb") as f:
+                f.write(data)
+            self.log(f"[+] Downloaded: {len(data) // 1024 // 1024} MB")
+        except Exception as e:
+            self.log(f"[!] Download failed: {e}")
+            return False
+        self.log("[*] Extracting (this may take a minute)...")
+        try:
+            with py7zr.SevenZipFile(archive, mode="r") as z:
+                z.extractall(downloads)
+            self.log("[+] Extracted successfully")
+        except Exception as e:
+            self.log(f"[!] Extraction failed: {e}")
+            return False
+        try:
+            os.remove(archive)
+        except:
+            pass
+        if os.path.exists(exe):
+            self.mingw_path = os.path.join(mingw_dir, "bin")
+            os.environ["PATH"] = self.mingw_path + ";" + os.environ.get("PATH", "")
+            self.mingw_label.config(text=f"MinGW: {self.mingw_path}", fg=GREEN)
+            try:
+                with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".mingw_path"), "w") as f:
+                    f.write(self.mingw_path)
+            except:
+                pass
+            self.log(f"[+] MinGW-w64 installed: {self.mingw_path}")
+            return True
+        self.log("[!] g++.exe not found after extraction")
         return False
 
     def pick_mingw(self):
