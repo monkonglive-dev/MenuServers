@@ -151,18 +151,7 @@ if "!MODE!"=="menu" (
     echo  %ESC%[93mStarting Frida bypass window...%ESC%[0m
     echo  %ESC%[96mStart Animal Company now. Frida will auto-inject when detected.%ESC%[0m
     echo.
-    >"%SCRIPTDIR%\run_bypass.bat" echo @echo off
-    >>"%SCRIPTDIR%\run_bypass.bat" echo title Monkongs Bypass
-    >>"%SCRIPTDIR%\run_bypass.bat" echo color 0A
-    >>"%SCRIPTDIR%\run_bypass.bat" echo.
-    >>"%SCRIPTDIR%\run_bypass.bat" echo echo  Starting frida bypass...
-    >>"%SCRIPTDIR%\run_bypass.bat" echo echo  Waiting for Animal Company...
-    >>"%SCRIPTDIR%\run_bypass.bat" echo echo.
-    >>"%SCRIPTDIR%\run_bypass.bat" echo frida -n "animalcompany.exe" --runtime=v8 !FRIDA_ARGS!
-    >>"%SCRIPTDIR%\run_bypass.bat" echo.
-    >>"%SCRIPTDIR%\run_bypass.bat" echo echo  Bypass finished. Press any key to close.
-    >>"%SCRIPTDIR%\run_bypass.bat" echo pause ^>nul
-    start "" "%SCRIPTDIR%\run_bypass.bat"
+    start "Monkongs Bypass" cmd /k frida -n animalcompany.exe --runtime=v8 !FRIDA_ARGS!
     echo  %ESC%[92mFrida bypass window opened!%ESC%[0m
 )
 
