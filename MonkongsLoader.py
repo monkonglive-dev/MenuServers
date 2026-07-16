@@ -384,14 +384,26 @@ class LoaderApp:
                     self._compile_overlay()
                     self.log("[+] ImGui overlay compiled! Launching...")
                     self._launch_overlay()
-                self.root.after(0, lambda: self.set_status("waiting for M key...", YELLOW))
-                self.log(f"[{datetime.now().strftime('%H:%M:%S')}] Load into game, then press M to inject...")
-                self._wait_m()
-                self.root.after(0, lambda: self.set_status("injecting...", YELLOW))
-                self._inject(mode)
-                self.root.after(0, lambda: self.set_status("injection complete", GREEN))
+
+                is_menu_only = (mode_name == "MENU ONLY")
+
+                if is_menu_only:
+                    self.root.after(0, lambda: self.set_status("waiting for M key...", YELLOW))
+                    self.log(f"[{datetime.now().strftime('%H:%M:%S')}] Load into game, then press M to inject menu...")
+                    self._wait_m()
+                    self.root.after(0, lambda: self.set_status("injecting...", YELLOW))
+                    self._inject(mode)
+                    self.root.after(0, lambda: self.set_status("injection complete", GREEN))
+                    self.log(f"[{datetime.now().strftime('%H:%M:%S')}] Successfully sideloaded {mode_name}!")
+                else:
+                    self.root.after(0, lambda: self.set_status("launching frida bypass...", YELLOW))
+                    self.log(f"[{datetime.now().strftime('%H:%M:%S')}] Starting Frida bypass window...")
+                    self.log("  Start Animal Company now. Frida will auto-inject when detected.")
+                    self._inject_bypass_new_window()
+                    self.root.after(0, lambda: self.set_status("bypass window opened", GREEN))
+                    self.log(f"[{datetime.now().strftime('%H:%M:%S')}] Frida bypass window opened!")
+
                 self.root.after(0, lambda: self.set_ready(True))
-                self.log(f"[{datetime.now().strftime('%H:%M:%S')}] Successfully sideloaded {mode_name}!")
             except Exception as e:
                 self.log(f"[{datetime.now().strftime('%H:%M:%S')}] ERROR: {e}")
                 self.root.after(0, lambda: self.set_status("injection failed", RED))
@@ -443,6 +455,31 @@ class LoaderApp:
         if r.stdout:
             for line in r.stdout.strip().split("\n")[-5:]:
                 self.log(f"  {line}")
+
+    def _inject_bypass_new_window(self):
+        js = sorted(glob.glob(os.path.join(SCRIPT_DIR, "*.js")))
+        if not js:
+            self.log("  [!] No JS files!")
+            return
+        frida_args = []
+        for f in js:
+            frida_args.extend(["-l", f])
+        bat_path = os.path.join(SCRIPT_DIR, "run_bypass.bat")
+        with open(bat_path, "w", encoding="utf-8") as bf:
+            bf.write("@echo off\n")
+            bf.write("title Monkongs Bypass\n")
+            bf.write("color 0A\n")
+            bf.write("echo.\n")
+            bf.write("echo  Starting frida bypass...\n")
+            bf.write("echo  Waiting for Animal Company...\n")
+            bf.write("echo.\n")
+            frida_cmd = " ".join(["frida", "-n", TARGET_PROCESS, "--runtime=v8"] + frida_args)
+            bf.write(f"{frida_cmd}\n")
+            bf.write("echo.\n")
+            bf.write("echo  Bypass finished. Press any key to close.\n")
+            bf.write("pause >nul\n")
+        subprocess.Popen([bat_path], creationflags=subprocess.CREATE_NEW_CONSOLE)
+        self.log(f"  [+] Frida bypass window launched with {len(js)} scripts")
 
     def _check_mingw(self):
         if self.mingw_path and os.path.exists(os.path.join(self.mingw_path, "g++.exe")):

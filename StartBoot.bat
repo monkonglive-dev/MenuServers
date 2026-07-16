@@ -133,33 +133,41 @@ goto do_inject
 
 :do_inject
 echo.
-echo  %ESC%[93mLoad into the game, then press M to inject...%ESC%[0m
-
-:wait_m
-for /f "delims=" %%A in ('powershell -NoProfile -Command "$k = $host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown'); Write-Output $k.VirtualKeyCode"') do set "key=%%A"
-if not "!key!"=="77" goto wait_m
-
-echo  %ESC%[96mInjecting scripts...%ESC%[0m
 
 set "FRIDA_ARGS="
 for %%f in ("%SCRIPTDIR%\*.js") do (
     set "FRIDA_ARGS=!FRIDA_ARGS! -l "%%f""
 )
 
-frida -n "animalcompany.exe" --runtime=v8 !FRIDA_ARGS!
-
-echo.
-if "!MODE!"=="eac" (
-    echo  %ESC%[92mSuccessfully sideloaded EAC Defuser!%ESC%[0m
-) else if "!MODE!"=="quest" (
-    echo  %ESC%[92mSuccessfully sideloaded M4Quest!%ESC%[0m
-) else if "!MODE!"=="menu" (
+if "!MODE!"=="menu" (
+    echo  %ESC%[93mLoad into the game, then press M to inject menu...%ESC%[0m
+    :wait_m_menu
+    for /f "delims=" %%A in ('powershell -NoProfile -Command "$k = $host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown'); Write-Output $k.VirtualKeyCode"') do set "key=%%A"
+    if not "!key!"=="77" goto wait_m_menu
+    echo  %ESC%[96mInjecting menu scripts...%ESC%[0m
+    frida -n "animalcompany.exe" --runtime=v8 !FRIDA_ARGS!
     echo  %ESC%[92mSuccessfully sideloaded Menu!%ESC%[0m
 ) else (
-    echo  %ESC%[92mSuccessfully sideloaded everything!%ESC%[0m
+    echo  %ESC%[93mStarting Frida bypass window...%ESC%[0m
+    echo  %ESC%[96mStart Animal Company now. Frida will auto-inject when detected.%ESC%[0m
+    echo.
+    >"%SCRIPTDIR%\run_bypass.bat" echo @echo off
+    >>"%SCRIPTDIR%\run_bypass.bat" echo title Monkongs Bypass
+    >>"%SCRIPTDIR%\run_bypass.bat" echo color 0A
+    >>"%SCRIPTDIR%\run_bypass.bat" echo.
+    >>"%SCRIPTDIR%\run_bypass.bat" echo echo  Starting frida bypass...
+    >>"%SCRIPTDIR%\run_bypass.bat" echo echo  Waiting for Animal Company...
+    >>"%SCRIPTDIR%\run_bypass.bat" echo echo.
+    >>"%SCRIPTDIR%\run_bypass.bat" echo frida -n "animalcompany.exe" --runtime=v8 !FRIDA_ARGS!
+    >>"%SCRIPTDIR%\run_bypass.bat" echo.
+    >>"%SCRIPTDIR%\run_bypass.bat" echo echo  Bypass finished. Press any key to close.
+    >>"%SCRIPTDIR%\run_bypass.bat" echo pause ^>nul
+    start "" "%SCRIPTDIR%\run_bypass.bat"
+    echo  %ESC%[92mFrida bypass window opened!%ESC%[0m
 )
+
 echo.
-echo  %ESC%[93mCleaning up...%ESC%[0m
-rmdir /s /q "%SCRIPTDIR%" >nul 2>&1
+echo  %ESC%[93mCleaning up after you close the bypass window...%ESC%[0m
 pause >nul
+rmdir /s /q "%SCRIPTDIR%" >nul 2>&1
 goto menu
