@@ -565,7 +565,7 @@ const VFXTypes = {
     FuelExplosion: 183
 };
 const version = "1.0.0";
-const menuName = "Monkongs Private";
+const menuName = "Monkongs Private"; // ImGui overlay by byte
 
 let menu = null;
 let reference = null;
@@ -5524,7 +5524,19 @@ function createObject(pos = zeroVector, rot = identityQuaternion, scale = oneVec
 
     const buttons: ButtonInfo[][] = [
 
-        [ 
+        [
+            new ButtonInfo({
+                buttonText: "Normal Menu",
+                method: () => { currentCategory = 0; currentPage = 0; sendNotification("Normal Menu active - use Up/Down to navigate", false); },
+                isTogglable: false,
+                toolTip: "Switch to the normal Frida-injected menu."
+            }),
+            new ButtonInfo({
+                buttonText: "ImGui Menu",
+                method: () => { sendNotification("ImGui Menu requires the overlay exe. Use the loader to launch it.", false); },
+                isTogglable: false,
+                toolTip: "Requires compiled overlay (MinGW-w64). Launch via MonkongsLoader."
+            }),
             new ButtonInfo({
                 buttonText: "Settings",
                 method: () => { currentCategory = 21; currentPage = 0; },
