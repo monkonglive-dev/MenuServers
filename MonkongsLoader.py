@@ -52,6 +52,17 @@ MODES = {
             ("03_menu.js", "MonksMenu.js"),
         ],
     },
+    "IMGUI OVERLAY": {
+        "desc": "External DX11 overlay (by byte). Requires MinGW-w64.",
+        "files": [
+            ("01_bridge.js", "frida-il2cpp-bridge.js"),
+            ("02_symbols.js", "symbols.js"),
+            ("03_eac.js", "Bypassed/eac.js"),
+            ("04_stuff.js", "Bypassed/stuff.js"),
+            ("05_menu.js", "MonksMenu.js"),
+        ],
+        "overlay": True,
+    },
 }
 
 BG      = "#1a0508"
@@ -70,7 +81,7 @@ BRIGHT  = "#ffffff"
 class LoaderApp:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("Monkongs Loader v1.0.0")
+        self.root.title("Monkongs Loader v1.0.0 - ImGui overlay by byte")
         self.root.geometry("960x640")
         self.root.configure(bg=BG)
         self.root.resizable(False, False)
@@ -342,6 +353,20 @@ class LoaderApp:
         def _run():
             try:
                 self._download(mode)
+                if mode.get("overlay"):
+                    self.root.after(0, lambda: self.set_status("checking MinGW-w64...", YELLOW))
+                    if not self._check_mingw():
+                        self.log("[!] MinGW-w64 not found!")
+                        self.log("[!] Download it from: https://github.com/niXman/mingw-builds-binaries/releases")
+                        self.log("[!] Install to C:\\mingw64 and add to PATH")
+                        self.root.after(0, lambda: self.set_status("MinGW-w64 required - see log", RED))
+                        self.root.after(0, lambda: self.set_ready(True))
+                        self.running = False
+                        return
+                    self.root.after(0, lambda: self.set_status("compiling overlay...", YELLOW))
+                    self._compile_overlay()
+                    self.log("[+] ImGui overlay compiled! Launching...")
+                    self._launch_overlay()
                 self.root.after(0, lambda: self.set_status("waiting for M key...", YELLOW))
                 self.log(f"[{datetime.now().strftime('%H:%M:%S')}] Load into game, then press M to inject...")
                 self._wait_m()
@@ -401,6 +426,74 @@ class LoaderApp:
         if r.stdout:
             for line in r.stdout.strip().split("\n")[-5:]:
                 self.log(f"  {line}")
+
+    def _check_mingw(self):
+        try:
+            r = subprocess.run(["g++", "--version"], capture_output=True, text=True, timeout=5)
+            if r.returncode == 0 and "mingw" in r.stdout.lower():
+                self.log(f"[+] MinGW-w64 found: {r.stdout.split(chr(10))[0]}")
+                return True
+        except:
+            pass
+        try:
+            r = subprocess.run(["where", "g++"], capture_output=True, text=True, timeout=5)
+            if r.returncode == 0:
+                self.log(f"[+] g++ found at: {r.stdout.strip()}")
+                return True
+        except:
+            pass
+        self.log("[-] MinGW-w64 g++ not found in PATH")
+        return False
+
+    def _compile_overlay(self):
+        OVERLAY_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "imgui_overlay")
+        if not os.path.exists(OVERLAY_DIR):
+            self.log("[!] imgui_overlay directory not found - download from GitHub")
+            self._download_overlay_source(OVERLAY_DIR)
+        build_bat = os.path.join(OVERLAY_DIR, "build.bat")
+        if not os.path.exists(build_bat):
+            self.log("[!] build.bat not found in imgui_overlay")
+            return
+        self.log(f"[{datetime.now().strftime('%H:%M:%S')}] Compiling overlay with MinGW-w64...")
+        r = subprocess.run(["cmd", "/c", build_bat], capture_output=True, text=True,
+                            timeout=300, cwd=OVERLAY_DIR)
+        if r.stdout:
+            for line in r.stdout.strip().split("\n"):
+                self.log(f"  {line}")
+        if r.returncode != 0 and r.stderr:
+            self.log(f"  [err] {r.stderr[:200]}")
+
+    def _download_overlay_source(self, dest):
+        self.log("[*] Downloading overlay source from GitHub...")
+        os.makedirs(dest, exist_ok=True)
+        cb = str(random.randint(10000, 99999))
+        overlay_files = [
+            ("src/main.cpp", "imgui_overlay/src/main.cpp"),
+            ("build.bat", "imgui_overlay/build.bat"),
+            ("CMakeLists.txt", "imgui_overlay/CMakeLists.txt"),
+            ("resources.rc", "imgui_overlay/resources.rc"),
+        ]
+        for local, remote in overlay_files:
+            url = f"{BASE_URL}/{remote}?v={cb}"
+            d = os.path.join(dest, local)
+            os.makedirs(os.path.dirname(d), exist_ok=True)
+            try:
+                req = urllib.request.Request(url, headers={"Cache-Control": "no-cache"})
+                data = urllib.request.urlopen(req, timeout=15).read().decode("utf-8")
+                with open(d, "w", encoding="utf-8") as f:
+                    f.write(data)
+                self.log(f"  [+] {local}")
+            except Exception as e:
+                self.log(f"  [!] {local}: {e}")
+
+    def _launch_overlay(self):
+        OVERLAY_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "imgui_overlay")
+        exe = os.path.join(OVERLAY_DIR, "build", "syte.xyz.exe")
+        if not os.path.exists(exe):
+            self.log("[!] Overlay exe not found at build\\syte.xyz.exe")
+            return
+        self.log(f"[+] Launching overlay: {exe}")
+        subprocess.Popen([exe], cwd=os.path.dirname(exe))
 
     def _cleanup(self):
         try:

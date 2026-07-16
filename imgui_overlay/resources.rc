@@ -1,0 +1,6 @@
+#include "include/resource.h"
+
+IDR_AC_BRIDGE RCDATA "runtime/ac_bridge.js"
+IDR_BACKEND   RCDATA "runtime/backend.js"
+IDR_SYTE_BLUEPRINT RCDATA "../syte.json"
+IDR_SPIRAL_CLICK WAVE "runtime/spiral_click.wav"
