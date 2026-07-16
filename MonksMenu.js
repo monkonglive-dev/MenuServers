@@ -740,6 +740,20 @@ let mobSpawnAsyncBroken = false;
 let forceAllStashSlotsEnabled = false;
 let containerFreedomAuraEnabled = false;
 let containerFreedomSweepDelay = 0;
+let goopFishGunDelay = 0;
+let perviousTeleportKey = false;
+let jellypower = 9999;
+let jellyspawner = 10;
+let jellyTimers = new Map();
+let highGravTargets = new Map();
+let zeroGravTargets = new Map();
+let basketballObject = null;
+let basketballTargetPlayer = null;
+let basketballPhysicalTransform = null;
+let hasSpawnedForCurrentTarget = false;
+let lastBasketballTeleportTime = 0;
+let basketballteleportgunenabled = false;
+let lastDebugTime = 0;
 let playerCagePrefabs = [];
 let playerCageEntries = [];
 let spawnedGoopObjects = [];
@@ -7430,6 +7444,33 @@ Il2Cpp.perform(async () => {
                 },
                 toolTip: "Gives you longer arms."
             }),
+            new ButtonInfo({
+                buttonText: "Jelly Self",
+                isTogglable: true,
+                method: () => {
+                    try {
+                        const me = NetPlayer.method("get_localPlayer").invoke();
+                        if (me && !me.isNull?.()) {
+                            me.method("RPC_SetJellyEffect").invoke(jellypower, jellypower);
+                        }
+                    }
+                    catch (_) { }
+                },
+                enableMethod: () => {
+                    sendNotification("Jelly Self ON", false);
+                },
+                disableMethod: () => {
+                    try {
+                        const me = NetPlayer.method("get_localPlayer").invoke();
+                        if (me && !me.isNull?.()) {
+                            me.method("RPC_SetJellyEffect").invoke(0, 0);
+                        }
+                    }
+                    catch (_) { }
+                    sendNotification("Jelly Self OFF", false);
+                },
+                toolTip: "Applies jelly effect to yourself until turned off."
+            }),
         ],
         [
             new ButtonInfo({
@@ -8402,6 +8443,449 @@ Il2Cpp.perform(async () => {
                 isTogglable: true,
                 toolTip: "Spawns the selected VFX at your gun pointer. Use VFX IDs settings to pick which one."
             }),
+            new ButtonInfo({
+                buttonText: "Goop Fish Gun",
+                enableMethod: () => { goopFishGunDelay = 0; },
+                method: () => {
+                    if (!rightGrab)
+                        return;
+                    try {
+                        renderGun();
+                    }
+                    catch (e) {
+                        console.error("Goop Fish Gun render error:", e);
+                        return;
+                    }
+                    if (!rightTrigger || time <= goopFishGunDelay)
+                        return;
+                    goopFishGunDelay = time + 0.01;
+                    try {
+                        spawnForwardLaunchedItem("item_goopfish", rightHandTransform, 28.0, 0.92);
+                    }
+                    catch (e) {
+                        console.error("Goop Fish Gun spawn error:", e);
+                    }
+                },
+                isTogglable: true,
+                toolTip: "Hold grip + trigger to rapidly launch Goop Fish from your hand."
+            }),
+            new ButtonInfo({
+                buttonText: "Teleport Gun",
+                method: () => {
+                    if (rightGrab) {
+                        const gunData = renderGun();
+                        const gunPointer = gunData.gunPointer;
+                        if (rightTrigger && !perviousTeleportKey) {
+                            const player = NetPlayer.method("get_localPlayer").invoke();
+                            if (player && !player.handle.isNull()) {
+                                const targetPos = getTransform(gunPointer).method("get_position").invoke();
+                                player.method("RPC_Teleport").invoke(targetPos);
+                                const rb = player.method("GetComponent", 1).inflate(Rigidbody).invoke();
+                                if (rb && !rb.isNull())
+                                    rb.method("set_linearVelocity").invoke(zeroVector);
+                            }
+                        }
+                        perviousTeleportKey = rightTrigger;
+                    }
+                },
+                isTogglable: true,
+                toolTip: "Grip + trigger to teleport to your gun pointer."
+            }),
+            new ButtonInfo({
+                buttonText: "Insta Kill Gun",
+                isTogglable: true,
+                method: () => {
+                    if (!rightGrab)
+                        return;
+                    const gunData = renderGun();
+                    const ray = gunData.ray;
+                    if (!ray || ray.handle.isNull())
+                        return;
+                    if (rightTrigger && time > lagGunDelay) {
+                        lagGunDelay = time + 0.25;
+                        try {
+                            const hitCollider = ray.method("get_collider").invoke();
+                            if (!hitCollider || hitCollider.isNull())
+                                return;
+                            const hitGO = hitCollider.method("get_gameObject").invoke();
+                            const hitPlayer = hitGO.method("GetComponentInParent", 0).inflate(NetPlayer).invoke();
+                            if (!hitPlayer || hitPlayer.isNull()) {
+                                sendNotification("No player there", false);
+                                return;
+                            }
+                            if (playerIsLocal(hitPlayer))
+                                return;
+                            const pos = getTransform(hitPlayer).method("get_position").invoke();
+                            const dmgNull = DamageSourceInfoClass.method("get_Null").invoke();
+                            hitPlayer.method("RPC_PlayerHit", 5).invoke(9999, pos, zeroVector, dmgNull, false);
+                            sendNotification("Insta killed: " + getPlayerName(hitPlayer), false);
+                        }
+                        catch (e) {
+                            console.error("Insta Kill Gun:", e);
+                        }
+                    }
+                },
+                toolTip: "Point at any player and pull trigger to deal 9999 damage."
+            }),
+            new ButtonInfo({
+                buttonText: "Launch Player Gun",
+                isTogglable: true,
+                method: () => {
+                    if (!rightGrab)
+                        return;
+                    const gunData = renderGun();
+                    const ray = gunData.ray;
+                    if (!ray || ray.handle.isNull())
+                        return;
+                    if (rightTrigger && time > lagGunDelay) {
+                        lagGunDelay = time + 0.1;
+                        try {
+                            const hitCollider = ray.method("get_collider").invoke();
+                            if (!hitCollider || hitCollider.isNull())
+                                return;
+                            const hitGO = hitCollider.method("get_gameObject").invoke();
+                            const hitPlayer = hitGO.method("GetComponentInParent", 0).inflate(NetPlayer).invoke();
+                            if (!hitPlayer || hitPlayer.isNull()) {
+                                sendNotification("No player there", false);
+                                return;
+                            }
+                            if (playerIsLocal(hitPlayer))
+                                return;
+                            hitPlayer.method("RPC_AddForce").invoke([0, 1500, 0]);
+                            sendNotification("Launched " + getPlayerName(hitPlayer) + "!", false);
+                        }
+                        catch (e) {
+                            console.error("Launch Player Gun:", e);
+                        }
+                    }
+                },
+                toolTip: "Point at any player and pull trigger to launch them upward."
+            }),
+            new ButtonInfo({
+                buttonText: "Jelly Gun",
+                method: () => {
+                    if (rightGrab) {
+                        const gunData = renderGun();
+                        const ray = gunData.ray;
+                        if (rightTrigger && ray) {
+                            const gunTarget = getComponentInParent(ray.method("get_collider").invoke(), NetPlayer);
+                            if (gunTarget && !gunTarget.handle.isNull() && time > tagGunDelay) {
+                                tagGunDelay = time + 0.5;
+                                if (!playerIsLocal(gunTarget) && (!whitelistEnabled || !whitelistHasPlayer(gunTarget))) {
+                                    gunTarget.method("RPC_SetJellyEffect").invoke(jellypower, jellypower);
+                                    jellyTimers.set(gunTarget, time + 30.0);
+                                    sendNotification("Jellied " + getPlayerName(gunTarget) + " for 30s!", false);
+                                }
+                            }
+                        }
+                    }
+                },
+                isTogglable: true,
+                toolTip: "Jellifies a player for 30 seconds (hold grip + trigger)."
+            }),
+            new ButtonInfo({
+                buttonText: "High Gravity Gun",
+                isTogglable: true,
+                enableMethod: () => { highGravTargets.clear(); sendNotification("High Gravity Gun ON", false); },
+                disableMethod: () => { highGravTargets.clear(); sendNotification("High Gravity Gun OFF", false); },
+                method: () => {
+                    if (rightGrab) {
+                        const gunData = renderGun();
+                        if (rightTrigger) {
+                            const ray = gunData.ray;
+                            if (ray && !ray.handle.isNull() && time > tagGunDelay) {
+                                tagGunDelay = time + 0.15;
+                                try {
+                                    const hitCollider = ray.method("get_collider").invoke();
+                                    if (!hitCollider || hitCollider.isNull())
+                                        return;
+                                    const hitGO = hitCollider.method("get_gameObject").invoke();
+                                    const hitPlayer = hitGO.method("GetComponentInParent", 0).inflate(NetPlayer).invoke();
+                                    if (!hitPlayer || hitPlayer.isNull())
+                                        return;
+                                    if (playerIsLocal(hitPlayer))
+                                        return;
+                                    if (whitelistEnabled && whitelistHasPlayer(hitPlayer))
+                                        return;
+                                    highGravTargets.set(hitPlayer, time + 30);
+                                    sendNotification("High gravity on " + getPlayerName(hitPlayer) + " for 30s", false);
+                                }
+                                catch (e) {
+                                    console.error("High Gravity Gun:", e);
+                                }
+                            }
+                        }
+                    }
+                    for (const [p, expiry] of highGravTargets) {
+                        try {
+                            if (!p || p.handle.isNull() || time > expiry) {
+                                highGravTargets.delete(p);
+                                continue;
+                            }
+                            p.method("RPC_AddForce").invoke([0, -50, 0]);
+                        }
+                        catch (_) {
+                            highGravTargets.delete(p);
+                        }
+                    }
+                },
+                toolTip: "Slams a player downward for 30 seconds (hold grip + trigger)."
+            }),
+            new ButtonInfo({
+                buttonText: "Zero Gravity Gun",
+                isTogglable: true,
+                enableMethod: () => { zeroGravTargets.clear(); sendNotification("Zero Gravity Gun ON", false); },
+                disableMethod: () => { zeroGravTargets.clear(); sendNotification("Zero Gravity Gun OFF", false); },
+                method: () => {
+                    if (rightGrab) {
+                        const gunData = renderGun();
+                        if (rightTrigger) {
+                            const ray = gunData.ray;
+                            if (ray && !ray.handle.isNull() && time > tagGunDelay) {
+                                tagGunDelay = time + 0.15;
+                                try {
+                                    const hitCollider = ray.method("get_collider").invoke();
+                                    if (!hitCollider || hitCollider.isNull())
+                                        return;
+                                    const hitGO = hitCollider.method("get_gameObject").invoke();
+                                    const hitPlayer = hitGO.method("GetComponentInParent", 0).inflate(NetPlayer).invoke();
+                                    if (!hitPlayer || hitPlayer.isNull())
+                                        return;
+                                    if (playerIsLocal(hitPlayer))
+                                        return;
+                                    if (whitelistEnabled && whitelistHasPlayer(hitPlayer))
+                                        return;
+                                    zeroGravTargets.set(hitPlayer, time + 30);
+                                    sendNotification("Zero gravity on " + getPlayerName(hitPlayer) + " for 30s", false);
+                                }
+                                catch (e) {
+                                    console.error("Zero Gravity Gun:", e);
+                                }
+                            }
+                        }
+                    }
+                    for (const [p, expiry] of zeroGravTargets) {
+                        try {
+                            if (!p || p.handle.isNull() || time > expiry) {
+                                zeroGravTargets.delete(p);
+                                continue;
+                            }
+                            p.method("RPC_AddForce").invoke([0, 50, 0]);
+                        }
+                        catch (_) {
+                            zeroGravTargets.delete(p);
+                        }
+                    }
+                },
+                toolTip: "Lifts a player upward for 30 seconds (hold grip + trigger)."
+            }),
+            new ButtonInfo({
+                buttonText: "Insta Kill All",
+                method: () => {
+                    try {
+                        let count = 0;
+                        const dmgNull = DamageSourceInfoClass.method("get_Null").invoke();
+                        for (const p of getAllNetPlayersList(false)) {
+                            try {
+                                if (!p || p.handle.isNull())
+                                    continue;
+                                if (playerIsLocal(p))
+                                    continue;
+                                const pos = getTransform(p).method("get_position").invoke();
+                                p.method("RPC_PlayerHit", 5).invoke(9999, pos, zeroVector, dmgNull, false);
+                                count++;
+                            }
+                            catch (_) { }
+                        }
+                        sendNotification("Insta killed all: " + count, false);
+                    }
+                    catch (e) {
+                        console.error("Insta Kill All:", e);
+                    }
+                },
+                isTogglable: false,
+                toolTip: "One click deals 9999 damage to every other player."
+            }),
+            new ButtonInfo({
+                buttonText: "Instant Kick Gun",
+                method: () => {
+                    if (!rightGrab) {
+                        destroyGun();
+                        return;
+                    }
+                    let gunData = null;
+                    try {
+                        gunData = renderGun();
+                    }
+                    catch (e) {
+                        return;
+                    }
+                    if (!gunData || !rightTrigger)
+                        return;
+                    try {
+                        if (time > tagGunDelay) {
+                            tagGunDelay = time + 0.5;
+                            const gunTarget = resolveGunTargetPlayer(gunData, 10.0);
+                            if (gunTarget && !gunTarget.isNull?.() && !playerIsLocal(gunTarget)) {
+                                kickCoroutine(gunTarget);
+                            }
+                        }
+                    }
+                    catch (e) {
+                        console.error("Instant Kick Gun:", e);
+                    }
+                },
+                isTogglable: true,
+                toolTip: "Kicks the player you aim at."
+            }),
+            new ButtonInfo({
+                buttonText: "Kick All",
+                method: () => {
+                    try {
+                        if (time > tagGunDelay) {
+                            tagGunDelay = time + 1.0;
+                            for (const p of getAllNetPlayersList(false)) {
+                                try {
+                                    if (!playerIsLocal(p))
+                                        kickCoroutine(p);
+                                }
+                                catch (e) { }
+                            }
+                            sendNotification("Kicked everyone!", false, 3);
+                        }
+                    }
+                    catch (e) {
+                        console.error("Kick All:", e);
+                    }
+                },
+                isTogglable: false,
+                toolTip: "Kicks all players in the lobby."
+            }),
+            new ButtonInfo({
+                buttonText: "Football Kidnapper On Touch",
+                isTogglable: true,
+                method: () => {
+                    if (rightGrab) {
+                        const gunData = renderGun();
+                        if (gunData && gunData.ray && !gunData.ray.handle.isNull()) {
+                            const ray = gunData.ray;
+                            try {
+                                if (!basketballTargetPlayer || (typeof basketballTargetPlayer.isNull === 'function' && basketballTargetPlayer.isNull())) {
+                                    const hitCollider = ray.method("get_collider").invoke();
+                                    if (hitCollider && !hitCollider.isNull()) {
+                                        const hitGO = hitCollider.method("get_gameObject").invoke();
+                                        const hitPlayer = hitGO.method("GetComponentInParent", 0).inflate(NetPlayer).invoke();
+                                        if (hitPlayer && !hitPlayer.isNull() && !playerIsLocal(hitPlayer)) {
+                                            const hitPoint = ray.method("get_point").invoke();
+                                            const handTransform = rightHandTransform;
+                                            if (hitPoint && handTransform && !handTransform.isNull?.()) {
+                                                const handPos = handTransform.method("get_position").invoke();
+                                                const distanceVec = Vector3.method("op_Subtraction").invoke(hitPoint, handPos);
+                                                const distance = distanceVec.method("get_magnitude").invoke();
+                                                if (distance <= 0.5) {
+                                                    basketballTargetPlayer = hitPlayer;
+                                                    hasSpawnedForCurrentTarget = false;
+                                                    sendNotification("Target Locked: " + (getPlayerName(hitPlayer) || "Player"), false, 2);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            catch (e) {
+                                console.error("[Football Kidnapper] Targeting Error:", e);
+                            }
+                            if (basketballTargetPlayer && !hasSpawnedForCurrentTarget && rightTrigger && time > itemGunDelay) {
+                                itemGunDelay = time + 0.3;
+                                try {
+                                    const hitPoint = ray.method("get_point").invoke();
+                                    if (hitPoint) {
+                                        const handTransform = rightHandTransform;
+                                        let targetRotation = identityQuaternion;
+                                        try {
+                                            const forward = getLaunchForward(handTransform);
+                                            const up = getLaunchUp(handTransform, forward);
+                                            targetRotation = getLaunchRotation(handTransform, forward, up);
+                                        }
+                                        catch (_) { }
+                                        basketballObject = spawnItemAtPos("item_football", hitPoint, targetRotation);
+                                        if (basketballObject && (typeof basketballObject.isNull !== 'function' || !basketballObject.isNull())) {
+                                            hasSpawnedForCurrentTarget = true;
+                                            sendNotification("Football linked to target!", false, 2);
+                                        }
+                                    }
+                                }
+                                catch (spawnErr) {
+                                    console.error("[Football Kidnapper] Spawn Error:", spawnErr);
+                                }
+                            }
+                        }
+                    }
+                    if (basketballTargetPlayer && (typeof basketballTargetPlayer.isNull !== 'function' || !basketballTargetPlayer.isNull()) &&
+                        basketballObject && (typeof basketballObject.isNull !== 'function' || !basketballObject.isNull())) {
+                        if (time > lastBasketballTeleportTime) {
+                            lastBasketballTeleportTime = time + 0.1;
+                            try {
+                                let ballPos = null;
+                                let activeGO = null;
+                                try {
+                                    activeGO = basketballObject.method("get_gameObject").invoke();
+                                }
+                                catch (_) { }
+                                if (!activeGO || activeGO.isNull())
+                                    activeGO = basketballObject;
+                                try {
+                                    const activeTransform = activeGO.method("get_transform").invoke();
+                                    const currentParent = activeTransform.method("get_parent").invoke();
+                                    if (currentParent && !currentParent.isNull() && rightHandTransform && !rightHandTransform.isNull?.()) {
+                                        ballPos = rightHandTransform.method("get_position").invoke();
+                                    }
+                                }
+                                catch (_) { }
+                                if (!ballPos) {
+                                    try {
+                                        const rbChild = activeGO.method("GetComponentInChildren", 0).inflate(Rigidbody).invoke();
+                                        if (rbChild && !rbChild.isNull())
+                                            ballPos = rbChild.method("get_position").invoke();
+                                    }
+                                    catch (_) { }
+                                }
+                                if (!ballPos) {
+                                    try {
+                                        ballPos = activeGO.method("get_transform").invoke().method("get_position").invoke();
+                                    }
+                                    catch (_) { }
+                                }
+                                if (ballPos)
+                                    basketballTargetPlayer.method("RPC_Teleport").invoke(ballPos);
+                            }
+                            catch (syncErr) {
+                                console.error("[Football Kidnapper] Tracking error:", syncErr);
+                            }
+                        }
+                    }
+                },
+                disableMethod: () => {
+                    try {
+                        if (basketballTargetPlayer && (typeof basketballTargetPlayer.isNull !== 'function' || !basketballTargetPlayer.isNull())) {
+                            const myTransform = rightHandTransform;
+                            if (myTransform && (typeof myTransform.isNull !== 'function' || !myTransform.isNull())) {
+                                const myPos = myTransform.method("get_position").invoke();
+                                basketballTargetPlayer.method("RPC_Teleport").invoke(myPos);
+                            }
+                        }
+                        if (basketballObject && (typeof basketballObject.isNull !== 'function' || !basketballObject.isNull()))
+                            Destroy(basketballObject);
+                    }
+                    catch (_) { }
+                    finally {
+                        basketballObject = null;
+                        basketballTargetPlayer = null;
+                        hasSpawnedForCurrentTarget = false;
+                    }
+                },
+                toolTip: "Touch player to lock. Pull trigger to link. Teleports target once every 0.1 second continuously."
+            }),
         ],
         [
             new ButtonInfo({
@@ -8959,6 +9443,31 @@ Il2Cpp.perform(async () => {
                 },
                 isTogglable: true,
                 toolTip: "Stinkies whoever your hand desires."
+            }),
+            new ButtonInfo({
+                buttonText: "Launch All",
+                isTogglable: false,
+                method: () => {
+                    try {
+                        let count = 0;
+                        for (const p of getAllNetPlayersList(false)) {
+                            try {
+                                if (!p || p.handle.isNull())
+                                    continue;
+                                if (playerIsLocal(p))
+                                    continue;
+                                p.method("RPC_AddForce").invoke([0, 1500, 0]);
+                                count++;
+                            }
+                            catch (_) { }
+                        }
+                        sendNotification("Launched " + count + " players!", false);
+                    }
+                    catch (e) {
+                        console.error("Launch All:", e);
+                    }
+                },
+                toolTip: "Launches all other players upward at once."
             }),
         ],
         [
@@ -12351,8 +12860,13 @@ Il2Cpp.perform(async () => {
             new ButtonInfo({
                 buttonText: "Theme: Blackout Orange",
                 method: () => { themeMode = 10; sendNotification("Theme: Blackout Orange", false); },
-                isTogglable: false,
                 toolTip: "Pitch black background, gray page buttons, and orange text."
+            }),
+            new ButtonInfo({
+                buttonText: "Theme: White Light",
+                method: () => { themeMode = 12; sendNotification("Theme: White Light", false); reloadMenu(); },
+                isTogglable: false,
+                toolTip: "White background, black buttons, grey text. Enabled buttons cycle through vivid colors."
             }),
         ],
         [
@@ -21168,7 +21682,16 @@ Il2Cpp.perform(async () => {
                     bgColor = [0.055, 0.0, 0.006, 0.98];
                     buttonColor = [0.115, 0.01, 0.012, 0.98];
                     buttonPressedColor = [0.36, 0.025, 0.035, 1.0];
-                    textColor = [1.0, 0.82, 0.72, 1.0];
+                }
+                else if (themeMode === 12) {
+                    bgColor = [1.0, 1.0, 1.0, 0.98];
+                    buttonColor = [0.06, 0.06, 0.06, 0.98];
+                    textColor = [0.72, 0.72, 0.72, 1.0];
+                    const h12 = (menuAnimTime * 0.09) % 1.0;
+                    const r12 = Math.max(0, Math.sin(h12 * Math.PI * 2)) * 0.85;
+                    const g12 = Math.max(0, Math.sin(h12 * Math.PI * 2 + 2.094)) * 0.85;
+                    const b12 = Math.max(0, Math.sin(h12 * Math.PI * 2 + 4.189)) * 0.85;
+                    buttonPressedColor = [r12, g12, b12, 1.0];
                 }
                 updateLiveMenuThemeVisuals();
                 runAdminLeaderboardOrbit();
@@ -21258,6 +21781,17 @@ Il2Cpp.perform(async () => {
                 }
                 cleanupDeadTrackedObjects(spawnedNetworkPrefabs);
                 cleanupDeadTrackedObjects(spawnedPersistentMobs);
+                if (jellyTimers.size > 0) {
+                    for (const [target, expireTime] of jellyTimers) {
+                        if (time > expireTime) {
+                            try {
+                                target.method("RPC_SetJellyEffect").invoke(0, 0);
+                            }
+                            catch (_) { }
+                            jellyTimers.delete(target);
+                        }
+                    }
+                }
                 if (mobForceStayEnabled) {
                     for (const mob of spawnedPersistentMobs) {
                         try {
