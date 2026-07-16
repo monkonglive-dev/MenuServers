@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 import subprocess, threading, os, sys, time, urllib.request, glob, random
 from datetime import datetime
 
@@ -175,6 +175,23 @@ class LoaderApp:
                                    activebackground=RED, activeforeground=BRIGHT, cursor="hand2",
                                    command=self.stop_injection)
         self.btn_stop.pack(fill="x", pady=2)
+        self.btn_mingw = tk.Button(bf, text="SET MinGW PATH", bg=PANEL2, fg=YELLOW,
+                                    font=("Consolas", 9, "bold"), relief="flat", bd=0, padx=8, pady=6,
+                                    activebackground=YELLOW, activeforeground=BRIGHT, cursor="hand2",
+                                    command=self.pick_mingw)
+        self.btn_mingw.pack(fill="x", pady=2)
+        self.mingw_label = tk.Label(bf, text="MinGW: not set", bg=PANEL, fg=DIM,
+                                     font=("Consolas", 7), anchor="w")
+        self.mingw_label.pack(fill="x", padx=2, pady=(2, 0))
+        self.mingw_path = None
+        saved = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".mingw_path")
+        if os.path.exists(saved):
+            with open(saved) as f:
+                p = f.read().strip()
+                if p and os.path.exists(p):
+                    self.mingw_path = p
+                    os.environ["PATH"] = p + ";" + os.environ.get("PATH", "")
+                    self.mingw_label.config(text=f"MinGW: {p}", fg=GREEN)
 
         tk.Label(left, text="\u2605 INFO", bg=PANEL, fg=ACCENT, font=("Consolas", 11, "bold"),
                  anchor="w", padx=10).pack(fill="x", pady=(14, 5))
@@ -428,6 +445,9 @@ class LoaderApp:
                 self.log(f"  {line}")
 
     def _check_mingw(self):
+        if self.mingw_path and os.path.exists(os.path.join(self.mingw_path, "g++.exe")):
+            self.log(f"[+] MinGW-w64 found from saved path: {self.mingw_path}")
+            return True
         try:
             r = subprocess.run(["g++", "--version"], capture_output=True, text=True, timeout=5)
             if r.returncode == 0 and "mingw" in r.stdout.lower():
@@ -436,35 +456,44 @@ class LoaderApp:
         except:
             pass
         downloads = os.path.join(os.environ.get("USERPROFILE", ""), "Downloads")
-        search_dirs = [
-            downloads,
-            os.path.join(downloads, "mingw64"),
-            os.path.join(downloads, "mingw"),
-        ]
-        for d in search_dirs:
-            if not os.path.isdir(d):
-                continue
-            for item in os.listdir(d):
-                full = os.path.join(d, item)
-                if not os.path.isdir(full):
-                    continue
-                gpp = os.path.join(full, "bin", "g++.exe")
-                if os.path.exists(gpp):
-                    self.log(f"[+] MinGW-w64 found: {gpp}")
-                    mingw_bin = os.path.join(full, "bin")
-                    os.environ["PATH"] = mingw_bin + ";" + os.environ.get("PATH", "")
-                    self.mingw_path = mingw_bin
-                    return True
-            gpp = os.path.join(d, "bin", "g++.exe")
-            if os.path.exists(gpp):
-                self.log(f"[+] MinGW-w64 found: {gpp}")
-                os.environ["PATH"] = os.path.join(d, "bin") + ";" + os.environ.get("PATH", "")
-                self.mingw_path = os.path.join(d, "bin")
+        for root, dirs, files in os.walk(downloads):
+            if "g++.exe" in files:
+                bin_dir = root
+                self.log(f"[+] MinGW-w64 found: {os.path.join(bin_dir, 'g++.exe')}")
+                os.environ["PATH"] = bin_dir + ";" + os.environ.get("PATH", "")
+                self.mingw_path = bin_dir
+                try:
+                    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".mingw_path"), "w") as f:
+                        f.write(bin_dir)
+                except:
+                    pass
                 return True
-        self.log("[-] MinGW-w64 not found in PATH or Downloads")
-        self.log("[!] Download from: https://github.com/niXman/mingw-builds-binaries/releases")
-        self.log("[!] Extract to Downloads\\mingw64")
+            depth = root.replace(downloads, "").count(os.sep)
+            if depth > 3:
+                dirs.clear()
+        self.log("[-] MinGW-w64 not found")
+        self.log("[!] Click 'SET MinGW PATH' or download from:")
+        self.log("[!] https://github.com/niXman/mingw-builds-binaries/releases")
         return False
+
+    def pick_mingw(self):
+        folder = filedialog.askdirectory(title="Select MinGW-w64 folder (must contain bin\\g++.exe)")
+        if folder:
+            gpp = os.path.join(folder, "bin", "g++.exe")
+            if os.path.exists(gpp):
+                self.mingw_path = os.path.join(folder, "bin")
+                os.environ["PATH"] = self.mingw_path + ";" + os.environ.get("PATH", "")
+                self.mingw_label.config(text=f"MinGW: {self.mingw_path}", fg=GREEN)
+                self.log(f"[+] MinGW-w64 set: {self.mingw_path}")
+                try:
+                    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".mingw_path"), "w") as f:
+                        f.write(self.mingw_path)
+                except:
+                    pass
+            else:
+                self.log(f"[!] g++.exe not found in {folder}\\bin")
+                self.mingw_label.config(text="MinGW: invalid folder", fg=RED)
+                messagebox.showerror("Monkongs", "g++.exe not found in that folder.\nSelect the folder that contains a 'bin' subfolder with g++.exe")
 
     def _compile_overlay(self):
         OVERLAY_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "imgui_overlay")
